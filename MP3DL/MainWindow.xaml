@@ -5,21 +5,32 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:local="clr-namespace:MP3DL"
     xmlns:adonisUi="clr-namespace:AdonisUI;assembly=AdonisUI"
-    xmlns:System="clr-namespace:System;assembly=System.Runtime" xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls" xmlns:Converters="clr-namespace:AdonisUI.Converters;assembly=AdonisUI" x:Name="main_window" x:Class="MP3DL.MainWindow"
+    xmlns:System="clr-namespace:System;assembly=System.Runtime" xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls" xmlns:Converters="clr-namespace:AdonisUI.Converters;assembly=AdonisUI" x:Name="MainWindowUI" x:Class="MP3DL.MainWindow"
     mc:Ignorable="d"
     Title="MP3DL" 
     Height="600" 
     Width="800"
     MinWidth="600"
-    MinHeight="550" SizeChanged="mainwindow_sizechanged" 
+    MinHeight="550" SizeChanged="MainWindow_SizeChanged" 
     Background="{DynamicResource {x:Static adonisUi:Brushes.Layer0BackgroundBrush}}"
     WindowStyle="SingleBorderWindow" FontFamily="Calibri"
-    WindowStartupLocation="CenterScreen" Loaded="onStartUp" MouseLeftButtonDown="MouseClicked">
+    WindowStartupLocation="CenterScreen" Loaded="OnStartUp" MouseLeftButtonDown="MouseClicked" Closing="OnClose" StateChanged="MainWindow_SizeChanged">
 
     <Window.Resources>
-        <Converters:MathConverter x:Key="MathConverter"/>
         <Style TargetType="{x:Type Image}">
             <Setter Property="RenderOptions.BitmapScalingMode" Value="HighQuality" />
+        </Style>
+        <Style x:Key="Body_Content_DataGrid_Centering"
+        TargetType="{x:Type DataGridCell}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type DataGridCell}">
+                        <Grid Background="{TemplateBinding Background}">
+                            <ContentPresenter VerticalAlignment="Center" />
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
     </Window.Resources>
     <Window.Style>
@@ -29,12 +40,12 @@
 
     <UserControl>
         <Grid>
-            <TabControl x:Name="main_tabc" TabStripPlacement="Top" 
+            <TabControl x:Name="MainTabControl" TabStripPlacement="Top" 
                     Margin="50,0,0,60" 
                     BorderBrush="{x:Null}" 
                     BorderThickness="0 0 0 0"
                     Foreground="{x:Null}" 
-                    Background="{DynamicResource {x:Static adonisUi:Brushes.Layer0BackgroundBrush}}" SelectedIndex="0" SelectionChanged="tabchanged">
+                    Background="{DynamicResource {x:Static adonisUi:Brushes.Layer0BackgroundBrush}}" SelectedIndex="0" SelectionChanged="Tab_Changed">
                 <TabItem x:Name="starttab" Header="Start" 
                      Visibility="Collapsed" 
                      BorderBrush="{x:Null}" 
@@ -73,20 +84,20 @@
                             </Label.Effect>
                         </Label>
                         <Label Content="Link:" HorizontalAlignment="Left" Margin="25,109,0,0" VerticalAlignment="Top" Height="16" FontFamily="Calibri" FontSize="16" FontWeight="Normal" Width="30"/>
-                        <TextBox x:Name="dltb" Margin="60,105,132,0" TextWrapping="Wrap" VerticalAlignment="Top" FontFamily="Calibri" FontSize="14" TextChanged="spotifytb_changed" Height="25" IsEnabled="False" Grid.ColumnSpan="3"/>
+                        <TextBox x:Name="LinkTextbox" Margin="60,105,132,0" TextWrapping="Wrap" VerticalAlignment="Top" FontFamily="Calibri" FontSize="14" TextChanged="LinkTextbox_Changed" Height="25" IsEnabled="False" Grid.ColumnSpan="3"/>
                         <Rectangle Height="2" Margin="0,91,0,0" 
                                Stroke="White"
                                VerticalAlignment="Top" Opacity="0.3" Grid.ColumnSpan="3"/>
                         <Button x:Name="spotdl" Content="Download" HorizontalAlignment="Right" Margin="0,133,132,0" VerticalAlignment="Top" Width="104"
-                                Background="{DynamicResource {x:Static adonisUi:Brushes.AccentInteractionBrush}}" FontSize="14" Click="download_click" Grid.Column="1" Height="25" Grid.ColumnSpan="2"/>
+                                Background="{DynamicResource {x:Static adonisUi:Brushes.AccentInteractionBrush}}" FontSize="14" Click="DownloadButton_Clicked" Grid.Column="1" Height="25" Grid.ColumnSpan="2" IsEnabled="False"/>
                         <Button x:Name="spotatq" Content="Add to Queue" HorizontalAlignment="Right" Margin="0,105,25,0" VerticalAlignment="Top" Width="104"
-                                FontSize="14" Click="spotatq_click" Grid.Column="2" Height="25"/>
+                                FontSize="14" Click="AddToQueueButton_Clicked" Grid.Column="2" Height="25" IsEnabled="True"/>
                         <Button x:Name="spotcancel" Content="Cancel All" HorizontalAlignment="Right" Margin="0,161,25,0" VerticalAlignment="Top" Width="211"
-                                FontSize="14" IsEnabled="False" Click="spotcancelb_click" Grid.Column="1" Height="25" Grid.ColumnSpan="2"/>
+                                FontSize="14" IsEnabled="False" Click="CancelAll_Clicked" Grid.Column="1" Height="25" Grid.ColumnSpan="2"/>
                         <Image 
-                            x:Name="img_Art" 
+                            x:Name="Art_Image" 
                             Source="/resources/default_art.jpg" 
-                            VerticalAlignment="Stretch" MouseLeftButtonDown="overridepreview" Grid.Column="1" Margin="0,196,0,0">
+                            VerticalAlignment="Stretch" MouseLeftButtonDown="CoverArt_Clicked" Grid.Column="1" Margin="0,196,0,0">
                             <Image.Effect>
                                 <DropShadowEffect BlurRadius="10" Opacity="0.5" ShadowDepth="2"/>
                             </Image.Effect>
@@ -99,10 +110,13 @@
                             FontSize="30" 
                             FontWeight="Normal" 
                             Margin="27,59,0,0" Grid.Column="2" VerticalAlignment="Center">
-                            <TextBlock x:Name="title_textblock" TextTrimming="CharacterEllipsis"><Run Text="Nothing!"/></TextBlock>
+                            <TextBlock 
+                                x:Name="Title_Textblock" 
+                                TextTrimming="CharacterEllipsis" 
+                                ToolTip="{Binding Text, RelativeSource={RelativeSource Self}}"><Run Text="Nothing!"/></TextBlock>
                         </Label>
                         <mah:ProgressRing 
-                            x:Name="spot_changering" 
+                            x:Name="PreviewProgressRing" 
                             HorizontalAlignment="Left" 
                             VerticalAlignment="Center" 
                             Foreground="White" 
@@ -113,19 +127,19 @@
                                 <DropShadowEffect BlurRadius="6" ShadowDepth="3"/>
                             </mah:ProgressRing.Effect>
                         </mah:ProgressRing>
-                        <DataGrid x:Name="queue"  
+                        <DataGrid x:Name="QueueDataGrid"  
                             AutoGenerateColumns="False" 
                                   FontSize="18" 
                                   FontWeight="Normal" 
                                   GridLinesVisibility="Horizontal" 
-                                  Margin="0,193,11,0" 
-                                  SelectionChanged="selectionchanged">
+                                  Margin="0,193,11,32" 
+                                  SelectionChanged="QueueSelection_Changed" CanUserAddRows="False">
                             <DataGrid.Effect>
                                 <DropShadowEffect BlurRadius="6" Opacity="0.4" ShadowDepth="1" />
                             </DataGrid.Effect>
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="Title" Width="3*" Binding="{Binding Title}"/>
-                                <DataGridTextColumn Header="Artists" Width="2*" Binding="{Binding PrintedArtists}"/>
+                                <DataGridTextColumn Header="Authors" Width="2*" Binding="{Binding PrintedAuthors}"/>
                                 <DataGridTextColumn Header="Album" Width="2*" Binding="{Binding Album}"/>
                             </DataGrid.Columns>
                         </DataGrid>
@@ -134,14 +148,17 @@
                             FontSize="24" 
                             FontWeight="Normal" 
                             Margin="27,131,0,0" Grid.Column="2" VerticalAlignment="Center">
-                            <TextBlock x:Name="artists_textblock" TextTrimming="CharacterEllipsis"><Run Text=""/></TextBlock>
+                            <TextBlock 
+                                x:Name="FirstAuthor_Textblock" 
+                                TextTrimming="CharacterEllipsis"
+                                ToolTip="{Binding Text, RelativeSource={RelativeSource Self}}"><Run Text=""/></TextBlock>
                         </Label>
                         <Button x:Name="spotdl_all" Content="Download All" HorizontalAlignment="Right" Margin="0,133,25,0" VerticalAlignment="Top" Width="104"
-                            Background="{DynamicResource {x:Static adonisUi:Brushes.AccentInteractionBrush}}" FontSize="14" Click="downloadall_click" Grid.Column="2" Height="25"/>
-                        <ProgressBar x:Name="spotify_pb" Height="3" Margin="61,126,133,0" VerticalAlignment="Top" BorderBrush="{x:Null}" Background="{x:Null}" Value="-1" Grid.ColumnSpan="3"/>
-                        <Label x:Name="status" Content="Idle" HorizontalAlignment="Left" Margin="71,146,0,0" VerticalAlignment="Top" FontWeight="Normal" FontSize="24" Height="30"/>
+                            Background="{DynamicResource {x:Static adonisUi:Brushes.AccentInteractionBrush}}" FontSize="14" Click="DownloadAll_Clicked" Grid.Column="2" Height="25" IsEnabled="False"/>
+                        <ProgressBar x:Name="ProgressBar" Height="3" Margin="61,126,133,0" VerticalAlignment="Top" BorderBrush="{x:Null}" Background="{x:Null}" Value="-1" Grid.ColumnSpan="3"/>
+                        <Label x:Name="DownloadStatusLabel" Content="Idle" HorizontalAlignment="Left" Margin="71,146,86,0" VerticalAlignment="Top" FontWeight="Normal" FontSize="24" Height="30" Grid.ColumnSpan="2"/>
                         <mah:ProgressRing 
-                            x:Name="spot_dlring" 
+                            x:Name="DownloadProgressRing" 
                             HorizontalAlignment="Right" 
                             VerticalAlignment="Top" 
                             Foreground="White" 
@@ -152,7 +169,17 @@
                                 <DropShadowEffect BlurRadius="6" ShadowDepth="3"/>
                             </mah:ProgressRing.Effect>
                         </mah:ProgressRing>
-                        <Button x:Name="audiovidtoggle" Grid.Column="2" Content="Audio Only" HorizontalAlignment="Right" Margin="0,105,132,0" VerticalAlignment="Top" Height="25" Width="65" Click="toggle_clicked" FontSize="10" Background="{x:Null}" BorderBrush="{x:Null}" Visibility="Hidden"/>
+                        <Button 
+                            x:Name="AudioVideoToggle" 
+                            Content="Audio Only" 
+                            HorizontalAlignment="Right" 
+                            Margin="0,105,132,0" 
+                            VerticalAlignment="Top" 
+                            Height="25" Width="65" Click="AudioVideoToggle_Clicked" 
+                            FontSize="10" 
+                            Background="{x:Null}" 
+                            BorderBrush="{x:Null}" Visibility="Hidden" Grid.ColumnSpan="3" ScrollViewer.VerticalScrollBarVisibility="Visible"/>
+                        <TextBlock x:Name="QueueCounter" HorizontalAlignment="Left" Margin="10,0,0,7" TextWrapping="Wrap" VerticalAlignment="Bottom" FontSize="14" Height="17" Foreground="White" Text="Nothing in queue..."/>
                     </Grid>
                 </TabItem>
                 <TabItem x:Name="musictab" Header="My Music" 
@@ -171,6 +198,57 @@
                                               BlurRadius="8" Opacity="0.4"/>
                             </Label.Effect>
                         </Label>
+                        <Rectangle HorizontalAlignment="Stretch" Height="2" Margin="0,91,0,0" 
+                               Stroke="White"
+                               VerticalAlignment="Top" Opacity="0.3"/>
+                        <DataGrid 
+                            x:Name="musiclist" 
+                            AutoGenerateColumns="False"
+                            Margin="10,140,10,10" 
+                            GridLinesVisibility="None" 
+                            CanUserReorderColumns="False" 
+                            CanUserSortColumns="False" 
+                            CanUserAddRows="False" 
+                            CanUserDeleteRows="False" 
+                            CanUserResizeRows="False" 
+                            IsReadOnly="True" 
+                            FontSize="18" 
+                            SelectionChanged="musiclist_SelectionChanged" 
+                            AlternatingRowBackground="{DynamicResource {x:Static adonisUi:Brushes.Layer1BackgroundBrush}}" CellStyle="{DynamicResource Body_Content_DataGrid_Centering}" RowHeight="42" VerticalGridLinesBrush="{x:Null}" HorizontalGridLinesBrush="{x:Null}" HeadersVisibility="None" EnableColumnVirtualization="True">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Title" Width="5*"  Binding="{Binding Title}"/>
+                                <DataGridTextColumn Header="Artist(s)" Width="3*"  Binding="{Binding PrintedAuthors}"/>
+                                <DataGridTextColumn Header="Album" Width="3*"  Binding="{Binding Album}"/>
+                                <DataGridTextColumn Header="Year" Width="1*"  Binding="{Binding Year}"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                        <TextBlock x:Name="musiccount" HorizontalAlignment="Left" Margin="32,71,0,0" TextWrapping="Wrap" Text="0 song(s)" VerticalAlignment="Top" Foreground="White"/>
+                        <TextBlock HorizontalAlignment="Right" Margin="0,105,137,0" TextWrapping="Wrap" Text="Sort By:" VerticalAlignment="Top" Foreground="White" Opacity="0.4" FontSize="16"/>
+                        <ComboBox x:Name="sortbycombobox" 
+                            HorizontalAlignment="Right" 
+                            Margin="0,101,46,0" 
+                            VerticalAlignment="Top" 
+                            Width="86" 
+                            Height="28" 
+                            IsReadOnly="True" SelectedIndex="0" IsSynchronizedWithCurrentItem="False" FontSize="16" SelectionChanged="sortby_changed" BorderBrush="{x:Null}">
+                            <TextBlock Text="Recency"/>
+                            <TextBlock Text="Title"/>
+                            <TextBlock Text="Artist"/>
+                            <TextBlock Text="Album"/>
+                            <TextBlock Text="Year"/>
+
+                        </ComboBox>
+                        <mah:ProgressRing 
+                            x:Name="musictabloading" 
+                            HorizontalAlignment="Right" Margin="0,15,39,0" VerticalAlignment="Top" 
+                            Height="44" Foreground="White" Opacity="0.5" Visibility="Hidden" Width="44">
+                            <mah:ProgressRing.Effect>
+                                <DropShadowEffect BlurRadius="6" ShadowDepth="3"/>
+                            </mah:ProgressRing.Effect>
+                        </mah:ProgressRing>
+                        <Button x:Name="managefoldersbutton" Content="Manage Folders" HorizontalAlignment="Left" Margin="32,101,0,0" VerticalAlignment="Top" FontSize="16" Background="{x:Null}" BorderBrush="{x:Null}" Click="ManageFoldersButton_Clicked" Opacity="0.4"/>
+                        <Button x:Name="autoplaybutton" Content="AutoPlay: On" HorizontalAlignment="Left" Margin="157,101,0,0" VerticalAlignment="Top" FontSize="16" Background="{x:Null}" BorderBrush="{x:Null}" Click="autoplaytoggle" Opacity="0.4"/>
+                        <Button x:Name="shufflebutton" Content="Shuffle: On" HorizontalAlignment="Left" Margin="263,101,0,0" VerticalAlignment="Top" FontSize="16" Background="{x:Null}" BorderBrush="{x:Null}" Click="shuffletoggle" Opacity="0.4"/>
                     </Grid>
                 </TabItem>
                 <TabItem x:Name="authtab" Header="Auth" 
@@ -192,8 +270,8 @@
                         <Rectangle HorizontalAlignment="Stretch" Height="2" Margin="0,91,0,0" 
                                Stroke="White"
                                VerticalAlignment="Top" Opacity="0.3"/>
-                        <PasswordBox x:Name="textboxID" HorizontalAlignment="Center" VerticalAlignment="Center" Width="266" FontSize="14" Height="30"/>
-                        <PasswordBox x:Name="textboxSecret" HorizontalAlignment="Center" VerticalAlignment="Center" Width="266" FontSize="14" Margin="0,77,0,0" Height="30"/>
+                        <PasswordBox x:Name="ClientIDTextbox" HorizontalAlignment="Center" VerticalAlignment="Center" Width="266" FontSize="14" Height="30"/>
+                        <PasswordBox x:Name="ClientSecretTextbox" HorizontalAlignment="Center" VerticalAlignment="Center" Width="266" FontSize="14" Margin="0,77,0,0" Height="30"/>
                         <Label Content="Client ID:" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="18" FontWeight="Normal" Margin="-347,0,0,0"/>
                         <Button x:Name="authbutton" 
                             Content="Authenticate" 
@@ -202,14 +280,14 @@
                             VerticalAlignment="Center" 
                             Width="200" 
                             FontSize="18"
-                            Background="{DynamicResource {x:Static adonisUi:Brushes.AccentInteractionBrush}}" Click="authenticate"/>
+                            Background="{DynamicResource {x:Static adonisUi:Brushes.AccentInteractionBrush}}" Click="AuthenticateButton_Clicked"/>
                         <Label Content="Client Secret:" VerticalAlignment="Center" FontSize="18" FontWeight="Normal" Margin="-378,78,0,0" HorizontalAlignment="Center"/>
-                        <mah:ProgressRing x:Name="authloading" Margin="0,149,0,0" VerticalAlignment="Center" Foreground="White" Opacity="0.5" Height="30" Width="30" Visibility="Hidden">
+                        <mah:ProgressRing x:Name="AuthProgressRing" Margin="0,149,0,0" VerticalAlignment="Center" Foreground="White" Opacity="0.5" Height="30" Width="30" Visibility="Hidden">
                             <mah:ProgressRing.Effect>
                                 <DropShadowEffect BlurRadius="6" ShadowDepth="3"/>
                             </mah:ProgressRing.Effect>
                         </mah:ProgressRing>
-                        <Label x:Name="authstatus" Content="UNAUTHENTICATED" HorizontalAlignment="Center" Margin="0,-58,0,0" VerticalAlignment="Center" FontWeight="Normal" FontStyle="Italic"/>
+                        <Label x:Name="AuthStatusLabel" Content="UNAUTHENTICATED" HorizontalAlignment="Center" Margin="0,-58,0,0" VerticalAlignment="Center" FontWeight="Normal" FontStyle="Italic"/>
                     </Grid>
                 </TabItem>
                 <TabItem x:Name="settingstab" Header="Settings" 
@@ -231,10 +309,13 @@
                         <Rectangle HorizontalAlignment="Stretch" Height="2" Margin="0,91,0,0" 
                                Stroke="White"
                                VerticalAlignment="Top" Opacity="0.3"/>
-                        <TextBox x:Name="dlfoldertb" HorizontalAlignment="Left" Margin="203,0,0,11" TextWrapping="Wrap" VerticalAlignment="Bottom" Width="232" FontSize="16" IsEnabled="False"/>
+                        <TextBox x:Name="OutputFolderTextbox" HorizontalAlignment="Left" Margin="203,0,0,11" TextWrapping="Wrap" VerticalAlignment="Bottom" Width="232" FontSize="16" IsEnabled="False"/>
                         <TextBlock HorizontalAlignment="Left" Margin="50,0,0,15" TextWrapping="Wrap" Text="Change output folder:" VerticalAlignment="Bottom" FontSize="16" Foreground="White" Width="143" Height="20"/>
-                        <Button x:Name="browsedlfolder" Content="..." HorizontalAlignment="Left" Margin="434,0,0,11" VerticalAlignment="Bottom" Height="28" Width="37" FontSize="16" Click="browsedlfolder_Click"/>
-                        <CheckBox x:Name="autoauth" Content="Authenticate on start-up" HorizontalAlignment="Left" Margin="50,133,0,0" VerticalAlignment="Top" FontSize="16" Click="autoauth_clicked"/>
+                        <Button x:Name="browsedlfolder" Content="..." HorizontalAlignment="Left" Margin="434,0,0,11" VerticalAlignment="Bottom" Height="28" Width="37" FontSize="16" Click="BrowseOutputFolder_Clicked"/>
+                        <CheckBox x:Name="AutoAuthCheckbox" Content="Authenticate on start-up" HorizontalAlignment="Left" Margin="50,156,0,0" VerticalAlignment="Top" FontSize="16" Click="AutoAuthCheckbox_Clicked"/>
+                        <TextBlock HorizontalAlignment="Left" Margin="50,113,0,0" TextWrapping="Wrap" Text="On Start Up" VerticalAlignment="Top" Foreground="White" FontSize="24"/>
+                        <TextBlock HorizontalAlignment="Left" Margin="50,218,0,0" TextWrapping="Wrap" Text="Playback" VerticalAlignment="Top" Foreground="White" FontSize="24"/>
+                        <CheckBox x:Name="bassboost" Content="Bass boost" HorizontalAlignment="Left" Margin="50,261,0,0" VerticalAlignment="Top" FontSize="16" Click="bassboost_clicked"/>
                     </Grid>
                 </TabItem>
             </TabControl>
@@ -245,7 +326,7 @@
                 <Grid.Effect>
                     <DropShadowEffect ShadowDepth="0.5" Direction="90" BlurRadius="5" Opacity="0.4"/>
                 </Grid.Effect>
-                <Button x:Name="expandplayerbutton" HorizontalAlignment="Right" Margin="0,0,8,0" VerticalAlignment="Top" Width="36" Height="36" Background="{x:Null}" BorderBrush="{x:Null}" Click="expplayerb_click">
+                <Button x:Name="ExpandPlayerButton" HorizontalAlignment="Right" Margin="0,0,8,0" VerticalAlignment="Top" Width="36" Height="36" Background="{x:Null}" BorderBrush="{x:Null}" Click="ExpandPlayerButton_Clicked">
                     <Image x:Name="expandicon" Height="18" Source="/resources/icon_expand_dark.png" Stretch="Fill" Width="18" RenderTransformOrigin="0.5,0.5">
                         <Image.RenderTransform>
                             <TransformGroup x:Name="exptransformgrp">
@@ -274,29 +355,52 @@
                        MaxWidth="125">
                     <TextBlock x:Name="pa_textblock" TextTrimming="CharacterEllipsis"><Run Text="Artist"/></TextBlock>
                 </Label>
-                <Button x:Name="previewb" HorizontalAlignment="Center" Width="60" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="{x:Null}" Click="previewb_click" Tag="np" VerticalAlignment="Center" Height="60" IsEnabled="False">
-                    <Image x:Name="img_previewb" Source="/resources/icon_play.png" VerticalAlignment="Stretch" Opacity="0.5"/>
+                <Button x:Name="PlayButton" HorizontalAlignment="Center" Width="60" 
+                        Background="{x:Null}" BorderBrush="{x:Null}" Foreground="{x:Null}" 
+                        Click="PlayButton_Clicked" Tag="np" VerticalAlignment="Center" 
+                        Height="60" IsEnabled="False">
+                    <Image x:Name="Image_PlayButton" Source="/resources/icon_play.png" VerticalAlignment="Stretch" Opacity="0.5"/>
+                </Button>
+                <Button x:Name="nextb"
+                        HorizontalAlignment="Center" Margin="130,0,0,0" 
+                        VerticalAlignment="Center" Width="60" Height="60" Background="{x:Null}" BorderBrush="{x:Null}" IsEnabled="False" Click="nextb_clicked">
+                    <Image x:Name="img_nextb" Source="/resources/icon_prevnext.png" VerticalAlignment="Stretch" Opacity="0.5"/>
+                </Button>
+                <Button x:Name="prevb" 
+                        VerticalAlignment="Center" Height="60" 
+                        Margin="0,0,130,0" HorizontalAlignment="Center" Width="60" Background="{x:Null}" BorderBrush="{x:Null}" IsEnabled="False" Click="prevb_clicked">
+                    <Image x:Name="img_prevb" Source="/resources/icon_prevnext.png" VerticalAlignment="Stretch" Opacity="0.5" RenderTransformOrigin="0.5,0.5">
+                        <Image.RenderTransform>
+                            <TransformGroup>
+                                <ScaleTransform ScaleX="-1"/>
+                                <SkewTransform/>
+                                <RotateTransform/>
+                                <TranslateTransform/>
+                            </TransformGroup>
+                        </Image.RenderTransform>
+                    </Image>
                 </Button>
                 <Slider x:Name="volumeslider" 
                     HorizontalAlignment="Right" 
                     VerticalAlignment="Center" 
                     Width="131"
                     Background="White"  
-                    BorderBrush="{x:Null}" Value="75" Maximum="100" SmallChange="1" LargeChange="10" Foreground="{x:Null}" Margin="0,-81,80,-77" ValueChanged="volumechanged" >
+                    BorderBrush="{x:Null}" Value="0.3" Maximum="1" SmallChange="1" LargeChange="10" Foreground="{x:Null}" Margin="0,-81,80,-77" Tag="shown" ValueChanged="VolumeSlider_Changed" TickPlacement="None" >
                     <Slider.Effect>
                         <DropShadowEffect ShadowDepth="2" BlurRadius="5" Opacity="0.2" Direction="0"/>
                     </Slider.Effect>
                 </Slider>
                 <Slider 
-                    x:Name="playbackposition" 
+                    x:Name="PlaybackPositionSlider" 
                     HorizontalAlignment="Center" 
                     VerticalAlignment="Top" Width="267" 
                     Margin="0,95,0,0" Maximum="300" 
                     IsEnabled="False" Background="White" 
                     BorderBrush="{x:Null}" 
                     Foreground="{x:Null}"
-                    Thumb.DragStarted="dragging"
-                    Thumb.DragCompleted="dragged" Opacity="0.5"/>
+                    Thumb.DragStarted="PlaybackPositionSlider_Dragging"
+                    Thumb.DragCompleted="PlaybackPositionSlider_Dragged" Opacity="0.5"/>
+
             </Grid>
             <Grid x:Name="main_menu" 
             Background=
@@ -311,7 +415,7 @@
             VerticalAlignment="Top" 
             Height="42" Width="250" 
             Background="{x:Null}" 
-            BorderBrush="{x:Null}" Click="menubutton_click">
+            BorderBrush="{x:Null}" Click="MenuButton_Clicked">
                     <Grid Width="240">
                         <Image Source="/resources/icon_menu_dark.png" HorizontalAlignment="Left" VerticalAlignment="Center" />
                         <TextBlock 
@@ -329,7 +433,7 @@
             VerticalAlignment="Top" 
             Height="42" Width="250" 
             Background="{x:Null}" 
-            BorderBrush="{x:Null}" Margin="0,48,0,0" Click="downloadb_click">
+            BorderBrush="{x:Null}" Margin="0,48,0,0" Click="DownloadsMenuItem_Clicked">
                     <Grid Width="240">
                         <Image Source="/resources/icon_dl.png" HorizontalAlignment="Left" VerticalAlignment="Center" />
                         <TextBlock 
@@ -346,7 +450,7 @@
             VerticalAlignment="Bottom" 
             Height="42" Width="250" 
             Background="{x:Null}" 
-            BorderBrush="{x:Null}" Margin="0,0,0,10" Click="settingsb_click">
+            BorderBrush="{x:Null}" Margin="0,0,0,10" Click="SettingsMenuItem_Clicked">
                     <Grid Width="240">
                         <Image Source="/resources/icon_settings.png" HorizontalAlignment="Left" VerticalAlignment="Center" />
                         <TextBlock 
@@ -364,9 +468,9 @@
             VerticalAlignment="Bottom" 
             Height="42" Width="250" 
             Background="{x:Null}" 
-            BorderBrush="{x:Null}" Margin="0,0,0,58" Click="authb_click">
+            BorderBrush="{x:Null}" Margin="0,0,0,58" Click="AuthMenuItem_Clicked">
                     <Grid Width="240">
-                        <Image x:Name="authb_img" Source="/resources/icon_lock.png" HorizontalAlignment="Left" VerticalAlignment="Center" />
+                        <Image x:Name="AuthMenuItem" Source="/resources/icon_lock.png" HorizontalAlignment="Left" VerticalAlignment="Center" />
                         <TextBlock 
                     HorizontalAlignment="Left" 
                     Margin="48,0,0,0" 
@@ -382,7 +486,7 @@
             VerticalAlignment="Top" 
             Height="42" Width="250" 
             Background="{x:Null}" 
-            BorderBrush="{x:Null}" Margin="0,96,0,0" Click="mymusicb_click">
+            BorderBrush="{x:Null}" Margin="0,96,0,0" Click="MyMusicMenuItem_Clicked">
                     <Grid Width="240">
                         <Image Source="/resources/icon_music.png" HorizontalAlignment="Left" VerticalAlignment="Center" />
                         <TextBlock 
@@ -398,7 +502,7 @@
                 <Button x:Name="dl_button" 
                     HorizontalAlignment="Left" Width="250" 
                     Background="{x:Null}" 
-                    BorderBrush="{x:Null}" Click="dlb_click" Margin="0,0,0,105" VerticalAlignment="Bottom" Height="42">
+                    BorderBrush="{x:Null}" Click="DownloadFolder_Clicked" Margin="0,0,0,105" VerticalAlignment="Bottom" Height="42">
                     <Grid Width="240">
                         <Image Source="/resources/icon_folder.png" HorizontalAlignment="Left" VerticalAlignment="Center" />
                         <TextBlock 

@@ -1,0 +1,87 @@
+﻿<Window x:Name="folderdialog" x:Class="MP3DL.FolderDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:adonisUi="clr-namespace:AdonisUI;assembly=AdonisUI"
+        xmlns:local="clr-namespace:MP3DL"
+        mc:Ignorable="d"
+        Title="FolderDialog" 
+        Height="420" 
+        Width="405" 
+        WindowStyle="None" 
+        ResizeMode="NoResize" 
+        Icon="/resources/icon.ico"
+        Background="{DynamicResource {x:Static adonisUi:Brushes.Layer0BackgroundBrush}}"
+        FontFamily="Calibri"
+        WindowStartupLocation="CenterOwner" AllowsTransparency="True" Topmost="True">
+    <Grid>
+        <Grid.Resources>
+            <DataTemplate x:Key="ButtonTemplate" >
+                <Button Content="{Binding path}" 
+                        HorizontalAlignment="Stretch" 
+                        Click="folder_clicked"
+                        Margin="10,10,0,10"/>
+            </DataTemplate>
+            <DataTemplate x:Key="RemoveTemplate" >
+                <Button Content="x" 
+                        HorizontalAlignment="Center" 
+                        Click="remove_clicked"
+                        Margin="0,10,10,10"
+                        Opacity="0.8"
+                        Tag="{Binding path}"/>
+            </DataTemplate>
+        </Grid.Resources>
+        <Button x:Name="okbutton" Content="OK" HorizontalAlignment="Center" Margin="0,349,0,0" VerticalAlignment="Top" Width="162" FontSize="18" IsDefault="True" Click="ok"/>
+        <Button 
+            x:Name="addbutton" 
+            Content="Add Folder" 
+            Margin="0,64,21,0" VerticalAlignment="Top" FontSize="14" HorizontalAlignment="Right" Width="78" Click="add"/>
+        <DataGrid x:Name="ListControl" 
+                  Margin="10,94,10,76"
+                  FontSize="16"
+                  FontFamily="Calibri"
+                  AutoGenerateColumns="False" 
+                  RowHeight="70" 
+                  GridLinesVisibility="None" 
+                  Padding="0,20,0,0" 
+                  CanUserReorderColumns="False" 
+                  CanUserResizeColumns="False" 
+                  CanUserSortColumns="False" 
+                  CanUserAddRows="False" 
+                  CanUserResizeRows="False" 
+                  CanUserDeleteRows="False"
+                  HeadersVisibility="None">
+            <DataGrid.Resources>
+                <ResourceDictionary>
+                    <Style x:Key="{x:Type DataGridCell}" TargetType="{x:Type DataGridCell}">
+                        <Setter Property="Background" Value="Transparent" />
+                        <Setter Property="BorderBrush" Value="Transparent" />
+                        <Style.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter Property="Background" Value="Transparent" />
+                                <Setter Property="BorderBrush" Value="Transparent" />
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                    <Style TargetType="{x:Type DataGridRow}">
+                        <Setter Property="Background" Value="Transparent" />
+                        <Setter Property="BorderBrush" Value="Transparent" />
+                        <Style.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter Property="Background" Value="Transparent" />
+                                <Setter Property="BorderBrush" Value="Transparent" />
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </ResourceDictionary>
+            </DataGrid.Resources>
+            <DataGrid.Columns>
+                <DataGridTemplateColumn Width="10*" CellTemplate="{StaticResource ButtonTemplate}"/>
+                <DataGridTemplateColumn Width="1*" CellTemplate="{StaticResource RemoveTemplate}"/>
+            </DataGrid.Columns>
+        </DataGrid>
+        <Rectangle HorizontalAlignment="Center" Height="2" Margin="0,94,0,0" VerticalAlignment="Top" Width="385" Fill="White" Opacity="0.2"/>
+        <TextBlock HorizontalAlignment="Center" Margin="0,17,0,0" TextWrapping="Wrap" Text="Manage Folders" VerticalAlignment="Top" Foreground="White" FontSize="24"/>
+    </Grid>
+</Window>
