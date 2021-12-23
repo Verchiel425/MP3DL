@@ -1,23 +1,10 @@
-﻿using SpotifyAPI.Web;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
+﻿using System;
 using System.Drawing;
 using System.IO;
-using System.Linq;
 using System.Windows.Media.Imaging;
-using TagLib;
-using YoutubeExplode.Videos;
-using MP3DL.Libraries;
 
 namespace MP3DL.Libraries
 {
-    public enum InputType
-    {
-        Null,
-        Spotify,
-        YouTubeMedia,
-    }
     class MP3File : IEquatable<MP3File>, IComparable<MP3File>
     {
         public string Filename { get; set; }
@@ -59,7 +46,7 @@ namespace MP3DL.Libraries
             ID = "";
             DateAdded = System.IO.File.GetLastWriteTimeUtc(this.Filename).ToString();
 
-            if(Year == "0")
+            if (Year == "0")
             {
                 Year = "";
             }
@@ -88,7 +75,7 @@ namespace MP3DL.Libraries
                 MemoryStream ms = new MemoryStream(ts.Tag.Pictures[0].Data.Data);
                 System.Drawing.Image tmp = System.Drawing.Image.FromStream(ms);
 
-                Bitmap image = (Bitmap)Utils.PadImage(tmp);
+                Bitmap image = (Bitmap)LibUtils.CropToSquare(tmp, 0);
 
                 MemoryStream memstream = new();
                 image.Save(memstream, System.Drawing.Imaging.ImageFormat.Jpeg);
@@ -101,6 +88,7 @@ namespace MP3DL.Libraries
                 ImageSource.EndInit();
 
                 ts.Dispose();
+                ms.Dispose();
                 return ImageSource;
             }
             catch
@@ -113,7 +101,7 @@ namespace MP3DL.Libraries
         public bool Equals(MP3File? other)
         {
             if (other == null) return false;
-            return (this.Filename.Equals(other.Filename));
+            return Filename.Equals(other.Filename);
         }
 
         public int CompareTo(MP3File? other)

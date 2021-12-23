@@ -1,4 +1,5 @@
-﻿using NAudio.Wave;
+﻿using MP3DL.Libraries;
+using NAudio.Wave;
 using Ookii.Dialogs.Wpf;
 using System;
 using System.Collections.Generic;
@@ -11,16 +12,15 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
-using MP3DL.Libraries;
 
 namespace MP3DL
 {
     public partial class MainWindow : Window
     {
-        #region EventHandlers
-        private void bassboost_clicked(object sender, RoutedEventArgs e)
+        #region UIHandlers
+        private void BassBoostCheckbox_Clicked(object sender, RoutedEventArgs e)
         {
-            if (bassboost.IsChecked == true)
+            if (BassBoostCheckbox.IsChecked == true)
             {
                 BASSBOOST = true;
             }
@@ -106,7 +106,7 @@ namespace MP3DL
                         if (!InsertFromStart)
                         {
                             PlayedSongs.Add((MP3File)musiclist.SelectedItem);
-                            CurrentIndexInPlayedSongs = PlayedSongs.Count -1;
+                            CurrentIndexInPlayedSongs = PlayedSongs.Count - 1;
                         }
                         else
                         {
@@ -167,7 +167,7 @@ namespace MP3DL
             FolderDialog folderDialog = new FolderDialog();
             this.Opacity = 0.5;
             folderDialog.Owner = this;
-            if(folderDialog.ShowDialog() == true)
+            if (folderDialog.ShowDialog() == true)
             {
                 if (folderDialog.StringList.Count < directories.Count)
                 {
@@ -204,19 +204,19 @@ namespace MP3DL
                     AnimateMenu();
                 }
             }
-            if ((MainWindowUI.Width <= 650 && WindowState == WindowState.Normal) && volumeslider.Tag.ToString() == "shown")
+            if ((MainWindowUI.Width <= 670 && WindowState == WindowState.Normal) && VolumeSlider.Tag.ToString() == "shown")
             {
-                volumeslider.Tag = "hidden";
-                FadeOutElements(pa_textblock, TextBlock.OpacityProperty);
-                FadeOutElements(pt_textblock, TextBlock.OpacityProperty);
-                FadeOutElements(volumeslider, Slider.OpacityProperty);
+                VolumeSlider.Tag = "hidden";
+                FadeOutElements(PlayerArtistTextblock, TextBlock.OpacityProperty);
+                FadeOutElements(PlayerTitleTextblock, TextBlock.OpacityProperty);
+                FadeOutElements(VolumeSlider, Slider.OpacityProperty);
             }
-            else if ((MainWindowUI.Width > 650 || WindowState == WindowState.Maximized) && volumeslider.Tag.ToString() == "hidden")
+            else if ((MainWindowUI.Width > 670 || WindowState == WindowState.Maximized) && VolumeSlider.Tag.ToString() == "hidden")
             {
-                volumeslider.Tag = "shown";
-                FadeInElements(pa_textblock, TextBlock.OpacityProperty);
-                FadeInElements(pt_textblock, TextBlock.OpacityProperty);
-                FadeInElements(volumeslider, Slider.OpacityProperty);
+                VolumeSlider.Tag = "shown";
+                FadeInElements(PlayerArtistTextblock, TextBlock.OpacityProperty);
+                FadeInElements(PlayerTitleTextblock, TextBlock.OpacityProperty);
+                FadeInElements(VolumeSlider, Slider.OpacityProperty);
             }
         }
         private void MenuButton_Clicked(object sender, RoutedEventArgs e)
@@ -273,6 +273,7 @@ namespace MP3DL
         }
         private async void UpdateFromTextbox()
         {
+            GC.Collect();
             if (spotify == null) { return; }
             if (!spotify.Authd) { return; }
 
@@ -392,7 +393,7 @@ namespace MP3DL
             }
             else
             {
-                if(PreviewItem is IMedia temp)
+                if (PreviewItem is IMedia temp)
                 {
                     if (temp is YouTubeVideo Video)
                     {
@@ -433,7 +434,7 @@ namespace MP3DL
         }
         private void VolumeSlider_Changed(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            mplayer.Volume = (float)(volumeslider.Value);
+            mplayer.Volume = (float)(VolumeSlider.Value);
         }
         private void PlayButton_Clicked(object sender, RoutedEventArgs e)
         {

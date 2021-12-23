@@ -131,7 +131,7 @@ namespace MP3DL.Libraries
             Playlist.Tracks = await Client.Playlists.GetItems
                 (Playlist.Id,
                 new PlaylistGetItemsRequest { Offset = offset });
-            
+
         }
         protected virtual void OnPlaylistFetchingProgressChanged(int Finished, int Total)
         {

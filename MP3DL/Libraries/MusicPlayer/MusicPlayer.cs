@@ -1,9 +1,8 @@
-﻿using NAudio.Dsp;
+﻿using NAudio.Extras;
 using NAudio.Wave;
 using System;
 using System.IO;
 using System.Net;
-using NAudio.Extras;
 using System.Windows.Threading;
 
 namespace MP3DL
@@ -56,7 +55,7 @@ namespace MP3DL
                    WaveFormatConversionStream.CreatePcmStream(
                        new Mp3FileReader(ms)));
             WaveChannel = new WaveChannel32(blockAlignedStream);
-            
+
 
             WaveOut.DesiredLatency = 100;
             if (!bassboost)
@@ -71,7 +70,7 @@ namespace MP3DL
 
             Duration = WaveChannel.TotalTime;
         }
-        public void LoadMedia(string filename,bool bassboost)
+        public void LoadMedia(string filename, bool bassboost)
         {
             if (WaveOut.PlaybackState == PlaybackState.Paused)
             {
@@ -80,7 +79,7 @@ namespace MP3DL
             }
             var reader = new Mp3FileReader(filename);
             WaveChannel = new WaveChannel32(reader);
-            
+
 
             WaveOut.DesiredLatency = 100;
 
@@ -163,8 +162,8 @@ namespace MP3DL
         }
         protected virtual void OnPlaybackPositionChanged()
         {
-            PlaybackPositionChanged?.Invoke(this, 
-                new PlaybackPositionEventArgs() 
+            PlaybackPositionChanged?.Invoke(this,
+                new PlaybackPositionEventArgs()
                 { PlaybackPositionMs = WaveChannel.CurrentTime.TotalMilliseconds });
         }
         protected virtual void OnResumedPlayback()

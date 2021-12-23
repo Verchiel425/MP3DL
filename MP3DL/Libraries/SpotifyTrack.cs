@@ -44,8 +44,10 @@ namespace MP3DL.Libraries
         public string PrintedAuthors { get; set; }
         public string FirstAuthor
         {
-            get {
-                return FirstFromPrinted(); }
+            get
+            {
+                return FirstFromPrinted();
+            }
         }
         private FullAlbum _Album { get; set; }
         public string Album { get; set; }

@@ -315,7 +315,7 @@
                         <CheckBox x:Name="AutoAuthCheckbox" Content="Authenticate on start-up" HorizontalAlignment="Left" Margin="50,156,0,0" VerticalAlignment="Top" FontSize="16" Click="AutoAuthCheckbox_Clicked"/>
                         <TextBlock HorizontalAlignment="Left" Margin="50,113,0,0" TextWrapping="Wrap" Text="On Start Up" VerticalAlignment="Top" Foreground="White" FontSize="24"/>
                         <TextBlock HorizontalAlignment="Left" Margin="50,218,0,0" TextWrapping="Wrap" Text="Playback" VerticalAlignment="Top" Foreground="White" FontSize="24"/>
-                        <CheckBox x:Name="bassboost" Content="Bass boost" HorizontalAlignment="Left" Margin="50,261,0,0" VerticalAlignment="Top" FontSize="16" Click="bassboost_clicked"/>
+                        <CheckBox x:Name="BassBoostCheckbox" Content="Bass boost" HorizontalAlignment="Left" Margin="50,261,0,0" VerticalAlignment="Top" FontSize="16" Click="BassBoostCheckbox_Clicked"/>
                     </Grid>
                 </TabItem>
             </TabControl>
@@ -345,7 +345,7 @@
                     HorizontalAlignment="Left" 
                     VerticalAlignment="Top" Margin="67,0,0,0"
                        MaxWidth="175">
-                    <TextBlock x:Name="pt_textblock" TextTrimming="CharacterEllipsis" Tag="none"><Run Text="Title"/></TextBlock>
+                    <TextBlock x:Name="PlayerTitleTextblock" TextTrimming="CharacterEllipsis" Tag="none"><Run Text="Title"/></TextBlock>
                 </Label>
                 <Label x:Name="playerArtist" 
                     FontSize="18" 
@@ -353,7 +353,7 @@
                     HorizontalAlignment="Left" 
                     VerticalAlignment="Top" Margin="67,28,0,0"
                        MaxWidth="125">
-                    <TextBlock x:Name="pa_textblock" TextTrimming="CharacterEllipsis"><Run Text="Artist"/></TextBlock>
+                    <TextBlock x:Name="PlayerArtistTextblock" TextTrimming="CharacterEllipsis"><Run Text="Artist"/></TextBlock>
                 </Label>
                 <Button x:Name="PlayButton" HorizontalAlignment="Center" Width="60" 
                         Background="{x:Null}" BorderBrush="{x:Null}" Foreground="{x:Null}" 
@@ -380,7 +380,7 @@
                         </Image.RenderTransform>
                     </Image>
                 </Button>
-                <Slider x:Name="volumeslider" 
+                <Slider x:Name="VolumeSlider" 
                     HorizontalAlignment="Right" 
                     VerticalAlignment="Center" 
                     Width="131"

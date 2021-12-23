@@ -3,17 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace MP3DL
 {
@@ -29,7 +20,7 @@ namespace MP3DL
             ListControl.ItemsSource = list;
             StringList = new();
 
-            foreach(var directory in ((MainWindow)Application.Current.MainWindow).directories)
+            foreach (var directory in ((MainWindow)Application.Current.MainWindow).directories)
             {
                 list.Add(new CustomData(directory));
             }
@@ -39,7 +30,7 @@ namespace MP3DL
         private void ok(object sender, RoutedEventArgs e)
         {
             this.DialogResult = true;
-            foreach(var item in list)
+            foreach (var item in list)
             {
                 StringList.Add(item.path);
             }
@@ -69,7 +60,7 @@ namespace MP3DL
 
             var tempdata = new CustomData(temppath);
 
-            foreach(var item in list)
+            foreach (var item in list)
             {
                 if (tempdata.Equals(item))
                 {

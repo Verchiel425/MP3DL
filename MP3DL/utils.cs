@@ -17,7 +17,7 @@ namespace MP3DL
             }
             catch (System.ArgumentOutOfRangeException)
             {
-                return null;
+                return "";
             }
         }
         public static string YouTubeID(string LINK)
@@ -31,19 +31,7 @@ namespace MP3DL
                 int a = LINK.LastIndexOf("/");
                 return LINK.Substring(a + 1, (LINK.Length - a) - 1);
             }
-            return null;
-        }
-        public static string JPG(string LINK)
-        {
-            try
-            {
-                int a = LINK.LastIndexOf(".jpg");
-                return LINK.Substring(0, a + 4);
-            }
-            catch
-            {
-                return "";
-            }
+            return "";
         }
         public static int GetLinkType(string LINK)
         {
@@ -63,38 +51,6 @@ namespace MP3DL
             {
                 return 3;
             }
-        }
-        public static System.Drawing.Image PadImage(System.Drawing.Image originalImage)
-        {
-            int squaredimensions = Math.Min(originalImage.Height, originalImage.Width);
-            Size squareSize = new Size(squaredimensions, squaredimensions);
-            Bitmap squareImage = new Bitmap(squareSize.Width, squareSize.Height);
-            using (Graphics graphics = Graphics.FromImage(squareImage))
-            {
-                graphics.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
-                graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
-                graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
-
-                graphics.DrawImage(originalImage, (squareSize.Width / 2) - (originalImage.Width / 2), (squareSize.Height / 2) - (originalImage.Height / 2), originalImage.Width, originalImage.Height);
-            }
-            return squareImage;
-        }
-        public static string ClearChars(string input)
-        {
-            string tmp = input;
-            tmp = tmp.Replace('/', '-');
-            tmp = tmp.Replace('|', ' ');
-            tmp = tmp.Replace('\"', ' ');
-            tmp = tmp.Replace('[', ' ');
-            tmp = tmp.Replace(']', ' ');
-            tmp = tmp.Replace('{', ' ');
-            tmp = tmp.Replace('}', ' ');
-            tmp = tmp.Replace('\'', ' ');
-            tmp = tmp.Replace(',', ' ');
-            tmp = tmp.Replace('.', ' ');
-            tmp = tmp.Replace(':', ' ');
-            tmp = tmp.Replace('?', ' ');
-            return tmp;
         }
         public static BitmapImage ToBitmapImage(Image Image)
         {

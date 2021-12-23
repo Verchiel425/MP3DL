@@ -1,18 +1,5 @@
-﻿using Ookii.Dialogs.Wpf;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using System;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Input;
-using System.Windows.Media.Imaging;
-using System.Windows.Threading;
-using MP3DL.Libraries;
 
 namespace MP3DL
 {
@@ -32,10 +19,8 @@ namespace MP3DL
             waiter.Tick += Waiter_Tick;
             delivery.Interval = TimeSpan.FromSeconds(1);
             delivery.Tick += Delivery_Tick;
-            scanner.DoWork += Scanner_DoWork;
-            scanner.WorkerReportsProgress = true;
-            scanner.ProgressChanged += Scanner_ProgressChanged;
-            scanner.RunWorkerCompleted += Scanner_RunWorkerCompleted;
+            scanner.DoWork += Scan;
+            scanner.RunWorkerCompleted += ScanComplete;
 
             spotify.PlaylistFetchingProgressChanged += Spotify_PlaylistFetchingProgressChanged;
             spotify.PlaylistFetchingDone += Spotify_PlaylistFetchingDone;

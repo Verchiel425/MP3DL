@@ -24,7 +24,7 @@ namespace MP3DL.Libraries
             ID = Video.Id;
             this.Type = Type;
 
-            if(this.Type == Type.Video)
+            if (this.Type == Type.Video)
             {
                 IsVideo = true;
             }
@@ -35,8 +35,10 @@ namespace MP3DL.Libraries
         }
         public string Name
         {
-            get {
-                return $"{FirstAuthor} - {Title}"; }
+            get
+            {
+                return $"{FirstAuthor} - {Title}";
+            }
         }
         private Video Video { get; set; }
         public string Title { get; set; }
@@ -49,9 +51,9 @@ namespace MP3DL.Libraries
             get
             {
                 WebClient client = new WebClient();
-                Stream stream = client.OpenRead(Utils.IsolateJPG(Video.Thumbnails[0].Url));
+                Stream stream = client.OpenRead(LibUtils.IsolateJPG(Video.Thumbnails[0].Url));
                 System.Drawing.Image thumbnail = System.Drawing.Image.FromStream(stream);
-                return Utils.PadImage(thumbnail);
+                return LibUtils.CropToSquare(thumbnail, 100);
             }
         }
 

@@ -3,7 +3,7 @@ using System.Drawing;
 
 namespace MP3DL.Libraries
 {
-    internal class Utils
+    internal class LibUtils
     {
         public static string ClearChars(string input)
         {
@@ -24,6 +24,7 @@ namespace MP3DL.Libraries
         }
         public static string IsolateJPG(string LINK)
         {
+            System.Diagnostics.Debug.WriteLine(LINK);
             try
             {
                 int a = LINK.LastIndexOf(".jpg");
@@ -34,9 +35,9 @@ namespace MP3DL.Libraries
                 return "";
             }
         }
-        public static System.Drawing.Image PadImage(System.Drawing.Image originalImage)
+        public static System.Drawing.Image CropToSquare(System.Drawing.Image originalImage, int offset)
         {
-            int squaredimensions = Math.Min(originalImage.Height, originalImage.Width);
+            int squaredimensions = Math.Min(originalImage.Height, originalImage.Width) - offset;
             Size squareSize = new Size(squaredimensions, squaredimensions);
             Bitmap squareImage = new Bitmap(squareSize.Width, squareSize.Height);
             using (Graphics graphics = Graphics.FromImage(squareImage))
@@ -45,7 +46,8 @@ namespace MP3DL.Libraries
                 graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
                 graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
 
-                graphics.DrawImage(originalImage, (squareSize.Width / 2) - (originalImage.Width / 2), (squareSize.Height / 2) - (originalImage.Height / 2), originalImage.Width, originalImage.Height);
+                graphics.DrawImage(originalImage, 
+                    (squareSize.Width / 2) - (originalImage.Width / 2), (squareSize.Height / 2) - (originalImage.Height / 2), originalImage.Width, originalImage.Height);
             }
             return squareImage;
         }

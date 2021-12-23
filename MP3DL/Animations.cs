@@ -3,7 +3,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
-using System.Windows.Media.Imaging;
 
 namespace MP3DL
 {
@@ -149,7 +148,7 @@ namespace MP3DL
             Storyboard storyboard = new();
             var changeOpacity = new DoubleAnimation
             {
-                Duration = new Duration(TimeSpan.FromMilliseconds(320)),
+                Duration = new Duration(TimeSpan.FromMilliseconds(250)),
                 AccelerationRatio = 0.4,
                 DecelerationRatio = 0.6,
                 From = 0,
@@ -160,12 +159,12 @@ namespace MP3DL
             Storyboard.SetTargetProperty(storyboard, new PropertyPath(TabControl.OpacityProperty));
             storyboard.Begin();
         }
-        private void FadeOutElements(UIElement control,DependencyProperty property)
+        private void FadeOutElements(UIElement control, DependencyProperty property)
         {
             Storyboard storyboard = new();
             var changeOpacity = new DoubleAnimation
             {
-                Duration = new Duration(TimeSpan.FromMilliseconds(250)),
+                Duration = new Duration(TimeSpan.FromMilliseconds(100)),
                 AccelerationRatio = 0.4,
                 DecelerationRatio = 0.6,
                 From = 1,
@@ -185,7 +184,7 @@ namespace MP3DL
             Storyboard storyboard = new();
             var changeOpacity = new DoubleAnimation
             {
-                Duration = new Duration(TimeSpan.FromMilliseconds(250)),
+                Duration = new Duration(TimeSpan.FromMilliseconds(100)),
                 AccelerationRatio = 0.4,
                 DecelerationRatio = 0.6,
                 From = 0,
@@ -235,18 +234,6 @@ namespace MP3DL
         private void RotationCompleted(object? sender, EventArgs e)
         {
             ExpandPlayerButton.IsEnabled = true;
-        }
-        private void IsPlaying(bool ISPLAYING)
-        {
-            if (ISPLAYING)
-            {
-                mplayer.Play();
-            }
-            else
-            {
-                
-                mplayer.Pause();
-            }
         }
     }
 }

@@ -1,14 +1,10 @@
-﻿using System;
+﻿using MP3DL.Libraries;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
-using MP3DL.Libraries;
 
 namespace MP3DL
 {
@@ -85,7 +81,7 @@ namespace MP3DL
             set
             {
                 _BASSBOOST = value;
-                bassboost.IsChecked = value;
+                BassBoostCheckbox.IsChecked = value;
                 Properties.Settings.Default.BassBoost = value;
             }
         }
@@ -95,7 +91,7 @@ namespace MP3DL
             set
             {
                 _SHUFFLE = value;
-                if(value == true)
+                if (value == true)
                 {
                     shufflebutton.Content = "Shuffle: On";
                 }
@@ -112,7 +108,7 @@ namespace MP3DL
             set
             {
                 _AUTOPLAY = value;
-                if(value == true)
+                if (value == true)
                 {
                     autoplaybutton.Content = "AutoPlay: On";
                 }
@@ -149,7 +145,7 @@ namespace MP3DL
         private List<MP3File> PlayedSongs = new();
         List<MP3File> temp = new();
 
-        
+
 
         private enum SortType
         {
@@ -164,7 +160,6 @@ namespace MP3DL
             Preview,
             FromFile
         }
-        private InputType Input { get; set; } = InputType.Null;
         private PlaybackType Playback { get; set; }
         private bool MOUSEOVERMENU { get; set; } = false;
         private bool AUDIOONLY { get; set; } = true;

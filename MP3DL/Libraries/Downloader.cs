@@ -1,10 +1,7 @@
 ﻿using System;
-using System.ComponentModel;
-using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows;
 using YoutubeExplode;
 using YoutubeExplode.Common;
 using YoutubeExplode.Converter;
@@ -34,7 +31,7 @@ namespace MP3DL.Libraries
         private YoutubeClient Client;
         public CancellationToken CancelToken;
         private Result _DownloadResult { get; set; }
-        public Result DownloadResult 
+        public Result DownloadResult
         {
             get { return _DownloadResult; }
             set
@@ -47,8 +44,8 @@ namespace MP3DL.Libraries
         private double Progress
         {
             get { return _Progress; }
-            set 
-            { 
+            set
+            {
                 _Progress = value;
                 OnProgressChanged();
             }
@@ -71,7 +68,7 @@ namespace MP3DL.Libraries
             CurrentlyDownloading = Track;
 
             Client = new YoutubeClient();
-            string CleanFilename = Utils.ClearChars(Track.Name);
+            string CleanFilename = LibUtils.ClearChars(Track.Name);
             var Progress = new Progress<double>(p => this.Progress = p);
 
             if (File.Exists(System.IO.Path.Combine(Output, $"{CleanFilename}.mp3")))
@@ -135,7 +132,7 @@ namespace MP3DL.Libraries
                 Type.Audio => "mp3",
                 _ => "mp3",
             };
-            string CleanFilename = Utils.ClearChars(Video.Name);
+            string CleanFilename = LibUtils.ClearChars(Video.Name);
             var Progress = new Progress<double>(p => this.Progress = p);
 
             if (File.Exists(System.IO.Path.Combine(Output, $"{CleanFilename}.{FileExtension}")))
@@ -210,10 +207,10 @@ namespace MP3DL.Libraries
         }
         protected virtual void OnDownloadCompleted()
         {
-            DownloadCompleted?.Invoke(this, 
-                    new DownloadCompleteEventArgs() 
-                    { 
-                        Result = DownloadResult 
+            DownloadCompleted?.Invoke(this,
+                    new DownloadCompleteEventArgs()
+                    {
+                        Result = DownloadResult
                     });
         }
     }

@@ -1,17 +1,10 @@
-﻿using NAudio.Wave;
+﻿using MP3DL.Libraries;
+using NAudio.Wave;
 using System;
 using System.Diagnostics;
-using System.IO;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media.Imaging;
-using YoutubeExplode;
-using YoutubeExplode.Common;
-using YoutubeExplode.Converter;
-using YoutubeExplode.Search;
-using YoutubeExplode.Videos;
-using MP3DL.Libraries;
 
 namespace MP3DL
 {
@@ -87,13 +80,14 @@ namespace MP3DL
             DownloadProgressRing.Visibility = Visibility.Visible;
 
             int temp = 0;
-            if(Item is IMedia Media) 
+            if (Item is IMedia Media)
             {
                 QueueBindingList.Add(Media);
                 temp++;
-            }else if(Item is SpotifyPlaylist Playlist)
+            }
+            else if (Item is SpotifyPlaylist Playlist)
             {
-                foreach(var Track in Playlist.Tracks)
+                foreach (var Track in Playlist.Tracks)
                 {
                     QueueBindingList.Add(Track);
                     temp++;
@@ -156,7 +150,7 @@ namespace MP3DL
         }
         public void DownloadProgressChanged(object? sender, Libraries.DownloadProgressEventArgs e)
         {
-            Dispatcher.Invoke(new Action(delegate 
+            Dispatcher.Invoke(new Action(delegate
             {
                 if (e.IsVideo)
                 {
@@ -187,8 +181,8 @@ namespace MP3DL
                 {
                     Playback = PlaybackType.Preview;
                     playerArt.Source = Utils.ToBitmapImage(Track.Art);
-                    pt_textblock.Text = Track.Title;
-                    pa_textblock.Text = Track.FirstAuthor;
+                    PlayerTitleTextblock.Text = Track.Title;
+                    PlayerArtistTextblock.Text = Track.FirstAuthor;
                     if (!string.IsNullOrWhiteSpace(Track.PreviewURL))
                     {
                         PlayerControlsEnabled(true);
@@ -210,8 +204,8 @@ namespace MP3DL
             {
                 Playback = PlaybackType.FromFile;
                 playerArt.Source = music.GetImageSource();
-                pt_textblock.Text = music.Title;
-                pa_textblock.Text = music.PrintedAuthors;
+                PlayerTitleTextblock.Text = music.Title;
+                PlayerArtistTextblock.Text = music.PrintedAuthors;
                 try
                 {
                     mplayer.LoadMedia(music.Filename, BASSBOOST);
@@ -298,9 +292,7 @@ namespace MP3DL
                 }
                 else
                 {
-
-                    var random = new Random();
-                    int nextindex = random.Next(0, musiclist.Items.Count - 1);
+                    int nextindex = new Random().Next(0, musiclist.Items.Count - 1);
                     musiclist.SelectedIndex = nextindex;
                 }
             }
