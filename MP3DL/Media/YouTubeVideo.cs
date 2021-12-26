@@ -1,68 +1,102 @@
-﻿using SpotifyAPI.Web;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
-using System.Linq;
 using System.Net;
 using TagLib;
+using YoutubeExplode.Videos;
 
-namespace MP3DL.Libraries
+namespace MP3DL.Media
 {
-    public class SpotifyTrack : IMedia
+    public class YouTubeVideo : IMedia
     {
-        public SpotifyTrack(FullTrack Track, FullAlbum Album)
+        public YouTubeVideo(Video Video, MediaType Type)
         {
-            Title = Track.Name;
-            Authors = ((IEnumerable<SimpleArtist>)Track.Artists).Select(p => p.Name).ToArray();
+            this.Video = Video;
+            Title = Video.Title;
+            Authors = new string[1] { Video.Author.Title };
             PrintedAuthors = PrintAuthors();
-            _Album = Album;
 
-            this.Album = Track.Album.Name;
-            Number = (uint)Track.TrackNumber;
-            Year = GetReleaseYear(Track.Album.ReleaseDate);
+            Number = 1;
+            Year = Video.UploadDate.Year.ToString();
 
-            PreviewURL = Track.PreviewUrl;
-            Duration = Track.DurationMs;
-            ID = Track.Id;
-        }
-        public System.Drawing.Image? Art
-        {
-            get
+            Duration = Video.Duration.Value.TotalMilliseconds;
+            ID = Video.Id;
+            this.Type = Type;
+
+            if (this.Type == MediaType.Video)
             {
-                WebClient TempWeb = new();
-                SpotifyAPI.Web.Image AlbumCover = _Album.Images[0];
-                Stream TempStream = TempWeb.OpenRead(AlbumCover.Url);
-                return System.Drawing.Image.FromStream(TempStream);
+                IsVideo = true;
             }
+            else
+            {
+                IsVideo = false;
+            }
+        }
+        public YouTubeVideo(YouTubeVideo Video)
+        {
+            this.Video = Video.Video;
+            Title = Video.Title;
+            Authors = Video.Authors;
+            PrintedAuthors = Video.PrintedAuthors;
+
+            Number = Video.Number;
+            Year = Video.Year;
+
+            Duration = Video.Duration;
+            ID = Video.ID;
+            this.Type = Video.Type;
+            IsVideo = Video.IsVideo;
         }
         public string Name
         {
-            get { return $"{FirstAuthor} - {Title}"; }
-        }
-        public string Title { get; set; }
-        public string[] Authors { get; private set; }
-        public string PrintedAuthors { get; set; }
-        public string FirstAuthor
-        {
             get
             {
-                return FirstFromPrinted();
+                return $"{FirstAuthor} - {Title}";
             }
         }
-        private FullAlbum _Album { get; set; }
+        private Video Video { get; set; }
+        public string Title { get; set; }
+
+        public string[] Authors { get; private set; }
         public string Album { get; set; }
+
+        public Image? Art { get; set; }
+
         public uint Number { get; private set; }
-        public string Year { get; private set; }
-        public string ID { get; private set; }
-        public string PreviewURL { get; private set; }
+
         public double Duration { get; private set; }
-        public bool IsVideo { get; private set; } = false;
+
+        public string ID { get; private set; }
+
+        public string Year { get; private set; }
+
+        public string PrintedAuthors { get; set; }
+
+        public string FirstAuthor
+        {
+            get { return FirstFromPrinted(); }
+        }
+        public MediaType Type { get; private set; }
+        public bool IsVideo { get; private set; }
+
+        public bool Equals(IMedia? other)
+        {
+            if (other == null)
+                return false;
+
+            if (this.Name == other.Name)
+                return true;
+            else
+                return false;
+        }
+
         public void SetTags(string Filename)
         {
             var Tagger = TagLib.File.Create(Filename);
             Tagger.Tag.Title = Title;
             Tagger.Tag.Performers = PrintedAuthorsToArray();
-            Tagger.Tag.Album = Album;
+            Tagger.Tag.Album = Title;
             Tagger.Tag.Track = Number;
             Tagger.Tag.Year = (uint)Int32.Parse(Year);
 
@@ -81,6 +115,16 @@ namespace MP3DL.Libraries
 
             Tagger.Save();
             Tagger.Dispose();
+        }
+        public void SetAsVideo()
+        {
+            Type = MediaType.Video;
+            IsVideo = true;
+        }
+        public void SetAsAudio()
+        {
+            Type = MediaType.Audio;
+            IsVideo = false;
         }
         private string PrintAuthors()
         {
@@ -131,32 +175,25 @@ namespace MP3DL.Libraries
             }
             return temp;
         }
-        private string GetReleaseYear(string fulldate)
-        {
-            if (fulldate.Contains('-'))
-            {
-                int x = fulldate.IndexOf('-');
-                return fulldate[..x];
-            }
-            else
-            {
-                return fulldate;
-            }
-        }
         public override string ToString()
         {
             return Name;
         }
 
-        public bool Equals(IMedia? other)
+        public Image GetArt()
         {
-            if (other == null)
-                return false;
-
-            if (this.Name == other.Name)
-                return true;
+            if (Art is null)
+            {
+                WebClient client = new WebClient();
+                Stream stream = client.OpenRead(LibUtils.IsolateJPG(Video.Thumbnails[0].Url));
+                System.Drawing.Image thumbnail = System.Drawing.Image.FromStream(stream);
+                Art = LibUtils.CropToSquare(thumbnail, 100);
+                return Art;
+            }
             else
-                return false;
+            {
+                return Art;
+            }
         }
     }
 }

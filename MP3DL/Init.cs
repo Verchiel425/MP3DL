@@ -1,4 +1,5 @@
-﻿using MP3DL.Libraries;
+﻿using MP3DL.Media;
+using MP3DL.Media.Audio;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -16,9 +17,9 @@ namespace MP3DL
             delivery.Stop();
             foreach (var music in temp)
             {
-                if (!MusicList.Contains(music))
+                if (!MusicBindingList.Contains(music))
                 {
-                    MusicList.Add(music);
+                    MusicBindingList.Add(music);
                 }
             }
             musictabloading.Visibility = Visibility.Hidden;
@@ -36,15 +37,16 @@ namespace MP3DL
 
             try
             {
+                MediaInput = null;
                 await spotify.SetCurrentTrack(await Search_PlainText());
-                AudioVideoToggle.Visibility = Visibility.Hidden;
+                MoreOptions.Visibility = Visibility.Hidden;
 
-                UpdatePreview(spotify.CurrentTrack);
+                UpdatePreview(spotify.CurrentTrack, InputFrom.User);
             }
             catch (ArgumentException)
             {
-                AudioVideoToggle.Visibility = Visibility.Hidden;
-                ClearPreview();
+                MoreOptions.Visibility = Visibility.Hidden;
+                ClearPreview(InputFrom.User);
             }
         }
         #endregion
@@ -93,11 +95,11 @@ namespace MP3DL
                 _SHUFFLE = value;
                 if (value == true)
                 {
-                    shufflebutton.Content = "Shuffle: On";
+                    ShuffleButton.Content = "Shuffle: On";
                 }
                 else
                 {
-                    shufflebutton.Content = "Shuffle: Off";
+                    ShuffleButton.Content = "Shuffle: Off";
                 }
                 Properties.Settings.Default.Shuffle = value;
             }
@@ -110,63 +112,47 @@ namespace MP3DL
                 _AUTOPLAY = value;
                 if (value == true)
                 {
-                    autoplaybutton.Content = "AutoPlay: On";
+                    AutoPlayButton.Content = "AutoPlay: On";
                 }
                 else
                 {
-                    autoplaybutton.Content = "AutoPlay: Off";
+                    AutoPlayButton.Content = "AutoPlay: Off";
                 }
                 Properties.Settings.Default.AutoPlay = value;
             }
         }
         #endregion
 
-        Downloader downloader = new();
-        Spotify spotify = new Spotify();
-        YouTube youtube = new();
-        MusicPlayer mplayer = new();
-        CancellationTokenSource cts = new();
+        readonly Downloader downloader = new();
+        readonly Spotify spotify = new Spotify();
+        readonly YouTube youtube = new();
+        readonly MusicPlayer mplayer = new();
         readonly UserFolders client = new UserFolders();
         readonly DispatcherTimer waiter = new();
         readonly DispatcherTimer delivery = new();
         readonly BindingList<IMedia> QueueBindingList = new();
-        readonly BindingList<MP3File> MusicList = new();
-        public List<string> _directories = new();
-        public List<string> directories
+        readonly BindingList<MP3File> MusicBindingList = new();
+        public List<string> _MusicFolders = new();
+        public List<string> MusicFolders
         {
-            get { return _directories; }
+            get { return _MusicFolders; }
             set
             {
-                _directories = value;
+                _MusicFolders = value;
                 client.MUSICFOLDERS = value;
                 client.Save();
             }
         }
-        private List<MP3File> PlayedSongs = new();
+        private NavigatableList<MP3File> PlayedSongs = new();
         List<MP3File> temp = new();
+        CancellationTokenSource cts = new();
 
-
-
-        private enum SortType
-        {
-            Title,
-            Artists,
-            Album,
-            Year,
-            Recency
-        }
-        private enum PlaybackType
-        {
-            Preview,
-            FromFile
-        }
         private PlaybackType Playback { get; set; }
+        private InputFrom InputType { get; set; } = InputFrom.User;
         private bool MOUSEOVERMENU { get; set; } = false;
         private bool AUDIOONLY { get; set; } = true;
         private bool MusicTabInitialized = false;
-        private int CurrentIndexInPlayedSongs;
-        private bool DoNotAdd = false;
-        private bool InsertFromStart = false;
-        private object? PreviewItem;
+        private object? MediaInput;
+        private object? CurrentlyPreviewing;
     }
 }

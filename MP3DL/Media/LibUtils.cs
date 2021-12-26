@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Drawing;
 
-namespace MP3DL.Libraries
+namespace MP3DL.Media
 {
     internal class LibUtils
     {
@@ -24,7 +24,6 @@ namespace MP3DL.Libraries
         }
         public static string IsolateJPG(string LINK)
         {
-            System.Diagnostics.Debug.WriteLine(LINK);
             try
             {
                 int a = LINK.LastIndexOf(".jpg");
@@ -46,7 +45,7 @@ namespace MP3DL.Libraries
                 graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
                 graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
 
-                graphics.DrawImage(originalImage, 
+                graphics.DrawImage(originalImage,
                     (squareSize.Width / 2) - (originalImage.Width / 2), (squareSize.Height / 2) - (originalImage.Height / 2), originalImage.Width, originalImage.Height);
             }
             return squareImage;

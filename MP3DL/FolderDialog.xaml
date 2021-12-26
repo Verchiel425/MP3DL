@@ -7,7 +7,7 @@
         xmlns:local="clr-namespace:MP3DL"
         mc:Ignorable="d"
         Title="FolderDialog" 
-        Height="420" 
+        Height="431" 
         Width="405" 
         WindowStyle="None" 
         ResizeMode="NoResize" 
@@ -32,11 +32,11 @@
                         Tag="{Binding path}"/>
             </DataTemplate>
         </Grid.Resources>
-        <Button x:Name="okbutton" Content="OK" HorizontalAlignment="Center" Margin="0,349,0,0" VerticalAlignment="Top" Width="162" FontSize="18" IsDefault="True" Click="ok"/>
+        <Button x:Name="okbutton" Content="OK" HorizontalAlignment="Center" Margin="0,349,0,0" VerticalAlignment="Top" Width="162" FontSize="18" IsDefault="True" Click="Ok"/>
         <Button 
             x:Name="addbutton" 
             Content="Add Folder" 
-            Margin="0,64,21,0" VerticalAlignment="Top" FontSize="14" HorizontalAlignment="Right" Width="78" Click="add"/>
+            Margin="0,64,21,0" VerticalAlignment="Top" FontSize="14" HorizontalAlignment="Right" Width="78" Click="Add"/>
         <DataGrid x:Name="ListControl" 
                   Margin="10,94,10,76"
                   FontSize="16"
@@ -83,5 +83,12 @@
         </DataGrid>
         <Rectangle HorizontalAlignment="Center" Height="2" Margin="0,94,0,0" VerticalAlignment="Top" Width="385" Fill="White" Opacity="0.2"/>
         <TextBlock HorizontalAlignment="Center" Margin="0,17,0,0" TextWrapping="Wrap" Text="Manage Folders" VerticalAlignment="Top" Foreground="White" FontSize="24"/>
+        <Button x:Name="cancelbutton" Content="Cancel" 
+                HorizontalAlignment="Center" Margin="0,384,0,0" 
+                VerticalAlignment="Top" Width="162" FontSize="18" 
+                IsDefault="True" Click="cancel"
+                Background="Transparent"
+                BorderBrush="Transparent"
+                Opacity="0.4"/>
     </Grid>
 </Window>

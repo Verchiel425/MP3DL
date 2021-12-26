@@ -1,4 +1,6 @@
-﻿using MP3DL.Libraries;
+﻿using MP3DL.Media;
+using MP3DL.Media.Audio;
+using MP3DL.Encryption;
 using NAudio.Wave;
 using Ookii.Dialogs.Wpf;
 using System;
@@ -58,71 +60,23 @@ namespace MP3DL
         }
         private void prevb_clicked(object sender, RoutedEventArgs e)
         {
-            if (CurrentIndexInPlayedSongs <= 0)
-            {
-                InsertFromStart = true;
-                int previndex = musiclist.SelectedIndex - 1;
-                if (previndex < 0)
-                {
-                    musiclist.SelectedIndex = musiclist.Items.Count - 1;
-                }
-                else
-                {
-                    musiclist.SelectedIndex = previndex;
-                }
-            }
-            else
-            {
-                DoNotAdd = true;
-                CurrentIndexInPlayedSongs -= 1;
-                musiclist.SelectedItem = PlayedSongs[CurrentIndexInPlayedSongs];
-            }
+            PrevSong();
         }
         private void musiclist_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (e.Source == musiclist && musiclist.SelectedItem is MP3File)
+            if (e.Source == MusicDataGrid && MusicDataGrid.SelectedItem is MP3File)
             {
-                if (!DoNotAdd)
+                if (InputType == InputFrom.User)
                 {
-                    if (PlayedSongs.Count > 0)
-                    {
-                        if (musiclist.SelectedItem != PlayedSongs[PlayedSongs.Count - 1])
-                        {
-                            if (!InsertFromStart)
-                            {
-                                PlayedSongs.Add((MP3File)musiclist.SelectedItem);
-                                CurrentIndexInPlayedSongs = PlayedSongs.Count - 1;
-                            }
-                            else
-                            {
-                                PlayedSongs.Insert(0, (MP3File)musiclist.SelectedItem);
-                                CurrentIndexInPlayedSongs = 0;
-                                InsertFromStart = false;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        if (!InsertFromStart)
-                        {
-                            PlayedSongs.Add((MP3File)musiclist.SelectedItem);
-                            CurrentIndexInPlayedSongs = PlayedSongs.Count - 1;
-                        }
-                        else
-                        {
-                            PlayedSongs.Insert(0, (MP3File)musiclist.SelectedItem);
-                            CurrentIndexInPlayedSongs = 0;
-                            InsertFromStart = false;
-                        }
-                    }
+                    PlayedSongs.Add((MP3File)MusicDataGrid.SelectedItem);
                 }
                 else
                 {
-                    DoNotAdd = false;
+                    InputType = InputFrom.User;
                 }
-                Debug.WriteLine($"Index: {CurrentIndexInPlayedSongs}");
-                Debug.WriteLine($"In {PlayedSongs.Count} played songs");
-                var item = (MP3File)musiclist.SelectedItem;
+                Debug.WriteLine($"--Index: {PlayedSongs.ReaderHead}--");
+                Debug.WriteLine($"--In {PlayedSongs.Count} played songs--");
+                var item = (MP3File)MusicDataGrid.SelectedItem;
                 if (mplayer.WaveOut.PlaybackState == PlaybackState.Playing || mplayer.WaveOut.PlaybackState == PlaybackState.Paused)
                 {
                     mplayer.Stop();
@@ -130,7 +84,11 @@ namespace MP3DL
 
                 if (!File.Exists(item.Filename))
                 {
-                    MusicList.Remove(item);
+                    MusicBindingList.Remove(item);
+                    if (PlayedSongs.Contains(item))
+                    {
+                        PlayedSongs.Remove(item);
+                    }
                     RefreshMusicList();
                     return;
                 }
@@ -166,19 +124,21 @@ namespace MP3DL
         {
             FolderDialog folderDialog = new FolderDialog();
             this.Opacity = 0.5;
+            MainWindowBlur.Radius = 8;
             folderDialog.Owner = this;
             if (folderDialog.ShowDialog() == true)
             {
-                if (folderDialog.StringList.Count < directories.Count)
+                if (folderDialog.StringList.Count < MusicFolders.Count)
                 {
-                    MusicList.Clear();
+                    MusicBindingList.Clear();
                 }
-                directories = folderDialog.StringList;
-                client.MUSICFOLDERS = directories;
+                MusicFolders = folderDialog.StringList;
+                client.MUSICFOLDERS = MusicFolders;
                 client.Save();
                 RefreshMusicList();
             }
             this.Opacity = 1;
+            MainWindowBlur.Radius = 0;
         }
         private void AutoAuthCheckbox_Clicked(object sender, RoutedEventArgs e)
         {
@@ -195,11 +155,7 @@ namespace MP3DL
         {
             if (MainWindowUI.Width == 600)
             {
-                if (main_menu.Tag.ToString() == "nexp")
-                {
-                    return;
-                }
-                else
+                if (MainMenu.Tag.Equals(ControlState.Active))
                 {
                     AnimateMenu();
                 }
@@ -207,16 +163,20 @@ namespace MP3DL
             if ((MainWindowUI.Width <= 670 && WindowState == WindowState.Normal) && VolumeSlider.Tag.ToString() == "shown")
             {
                 VolumeSlider.Tag = "hidden";
-                FadeOutElements(PlayerArtistTextblock, TextBlock.OpacityProperty);
-                FadeOutElements(PlayerTitleTextblock, TextBlock.OpacityProperty);
-                FadeOutElements(VolumeSlider, Slider.OpacityProperty);
+                FadeOutElements(PlayerArtistTextblock, TextBlock.OpacityProperty, 1);
+                FadeOutElements(PlayerTitleTextblock, TextBlock.OpacityProperty, 1);
+                FadeOutElements(VolumeSlider, Slider.OpacityProperty, 1);
+                FadeOutElements(ShuffleButton, Slider.OpacityProperty, 0.4);
+                FadeOutElements(AutoPlayButton, Slider.OpacityProperty, 0.4);
             }
             else if ((MainWindowUI.Width > 670 || WindowState == WindowState.Maximized) && VolumeSlider.Tag.ToString() == "hidden")
             {
                 VolumeSlider.Tag = "shown";
-                FadeInElements(PlayerArtistTextblock, TextBlock.OpacityProperty);
-                FadeInElements(PlayerTitleTextblock, TextBlock.OpacityProperty);
-                FadeInElements(VolumeSlider, Slider.OpacityProperty);
+                FadeInElements(PlayerArtistTextblock, TextBlock.OpacityProperty, 1);
+                FadeInElements(PlayerTitleTextblock, TextBlock.OpacityProperty, 1);
+                FadeInElements(VolumeSlider, Slider.OpacityProperty, 1);
+                FadeInElements(ShuffleButton, Slider.OpacityProperty, 0.4);
+                FadeInElements(AutoPlayButton, Slider.OpacityProperty, 0.4);
             }
         }
         private void MenuButton_Clicked(object sender, RoutedEventArgs e)
@@ -280,30 +240,40 @@ namespace MP3DL
             Title_Textblock.Text = "Please wait...";
             FirstAuthor_Textblock.Text = "";
             PreviewProgressRing.Visibility = Visibility.Visible;
-            string LINK = LinkTextbox.Text;
 
-            string ID = Utils.SpotifyID(LINK);
+            var link = Utils.FilterLink(LinkTextbox.Text);
 
             try
             {
-                switch (Utils.GetLinkType(LINK))
+                switch (link.Type)
                 {
-                    case 0://Track
-                        await spotify.SetCurrentTrack(ID);
-                        AudioVideoToggle.Visibility = Visibility.Hidden;
-                        UpdatePreview(spotify.CurrentTrack);
+                    case LinkType.SpotifyTrack:
+                        MediaInput = null;
+                        await spotify.SetCurrentTrack(link.Link);
+                        MoreOptions.Visibility = Visibility.Hidden;
+                        UpdatePreview(spotify.CurrentTrack, InputFrom.User);
                         break;
-                    case 1://Playlist
-                        await spotify.SetCurrentPlaylist(ID);
-                        AudioVideoToggle.Visibility = Visibility.Hidden;
-                        UpdatePreview(spotify.CurrentPlaylist);
+                    case LinkType.SpotifyPlaylist:
+                        MediaInput = null;
+                        await spotify.SetCurrentPlaylist(link.Link);
+                        MoreOptions.Visibility = Visibility.Hidden;
+                        UpdatePreview(spotify.CurrentMediaCollection);
                         break;
-                    case 2://Video
-                        await youtube.SetCurrentVid(LINK);
-                        AudioVideoToggle.Visibility = Visibility.Visible;
-                        UpdatePreview(youtube.CurrentVideo);
+                    case LinkType.SpotifyAlbum:
+                        MediaInput = null;
+                        await spotify.SetCurrentAlbum(link.Link);
+                        MoreOptions.Visibility = Visibility.Hidden;
+                        UpdatePreview(spotify.CurrentMediaCollection);
                         break;
-                    case 3://Plain_Search
+                    case LinkType.YouTubeVideo:
+                        MediaInput = null;
+                        await youtube.SetCurrentVid(link.Link);
+                        MoreOptions.Visibility = Visibility.Visible;
+                        UpdatePreview(youtube.CurrentVideo, InputFrom.User);
+                        break;
+                    case LinkType.YouTubePlaylist:
+                        break;
+                    case LinkType.PlainText:
                         waiter.Stop();
                         waiter.Start();
                         break;
@@ -311,27 +281,20 @@ namespace MP3DL
             }
             catch (ArgumentException)
             {
-                AudioVideoToggle.Visibility = Visibility.Hidden;
-                ClearPreview();
+                MoreOptions.Visibility = Visibility.Hidden;
+                ClearPreview(InputFrom.User);
             }
         }
         private void AddToQueueButton_Clicked(object sender, RoutedEventArgs e)
         {
             if (!spotify.Authd) { return; }
-            if (PreviewItem is not null)
+            if (MediaInput is not null)
             {
-                if (PreviewItem is YouTubeVideo Video)
+                if (CurrentlyPreviewing != MediaInput)
                 {
-                    if (AUDIOONLY)
-                    {
-                        Video.SetAsAudio();
-                    }
-                    else
-                    {
-                        Video.SetAsVideo();
-                    }
+                    UpdatePreview(MediaInput, InputFrom.Code);
                 }
-                AddToQueue(PreviewItem);
+                AddToQueue(MediaInput);
             }
         }
         private void QueueSelection_Changed(object sender, SelectionChangedEventArgs e)
@@ -344,18 +307,18 @@ namespace MP3DL
             {
                 if (QueueDataGrid.SelectedItem is IMedia temp)
                 {
-                    UpdatePreview(temp);
+                    UpdatePreview(temp, InputFrom.Code);
                 }
                 else
                 {
-                    if (QueueBindingList.Count == 0)
+                    if (QueueBindingList.Count <= 1)
                     {
                         UpdateFromTextbox();
                         return;
                     }
                     else
                     {
-                        ClearPreview();
+                        ClearPreview(InputFrom.Code);
                         return;
                     }
                 }
@@ -365,21 +328,10 @@ namespace MP3DL
         {
             cts = new CancellationTokenSource();
             downloader.CancelToken = cts.Token;
-            DownloadControlEnabled(false);
+            DownloadControlsEnabled(false);
 
             if (QueueDataGrid.SelectedItem is IMedia Selected)
             {
-                if (Selected is YouTubeVideo Video)
-                {
-                    if (AUDIOONLY)
-                    {
-                        Video.SetAsAudio();
-                    }
-                    else
-                    {
-                        Video.SetAsVideo();
-                    }
-                }
                 await InitializeDownload(Selected);
                 try
                 {
@@ -393,39 +345,28 @@ namespace MP3DL
             }
             else
             {
-                if (PreviewItem is IMedia temp)
+                if (MediaInput is IMedia temp)
                 {
-                    if (temp is YouTubeVideo Video)
-                    {
-                        if (AUDIOONLY)
-                        {
-                            Video.SetAsAudio();
-                        }
-                        else
-                        {
-                            Video.SetAsVideo();
-                        }
-                    }
                     await InitializeDownload(temp);
                 }
             }
 
-            DownloadControlEnabled(true);
+            DownloadControlsEnabled(true);
         }
         private async void DownloadAll_Clicked(object sender, RoutedEventArgs e)
         {
             cts = new CancellationTokenSource();
             downloader.CancelToken = cts.Token;
-            DownloadControlEnabled(false);
+            DownloadControlsEnabled(false);
             List<IMedia> tmp = QueueBindingList.ToList();
             foreach (IMedia media in tmp)
             {
                 if (cts.IsCancellationRequested) { break; }
-                UpdatePreview(media);
+                UpdatePreview(media, InputFrom.Code);
                 await InitializeDownload(media);
                 RemoveFromQueue(media);
             }
-            DownloadControlEnabled(true);
+            DownloadControlsEnabled(true);
         }
         private void CancelAll_Clicked(object sender, RoutedEventArgs e)
         {
@@ -474,35 +415,46 @@ namespace MP3DL
         }
         private void CoverArt_Clicked(object sender, MouseButtonEventArgs e)
         {
-            if (PreviewItem is IMedia Media)
+            if (CurrentlyPreviewing is IMedia Media)
             {
                 mplayer.Stop();
                 SetPreviewToPlayer(Media);
             }
         }
-        private void AudioVideoToggle_Clicked(object sender, RoutedEventArgs e)
+        private void MoreOptions_Clicked(object sender, RoutedEventArgs e)
         {
-            if (AUDIOONLY)
+            if (MediaInput is YouTubeVideo Video)
             {
-                AUDIOONLY = false;
-                AudioVideoToggle.Content = "+ Video";
-            }
-            else
-            {
-                AUDIOONLY = true;
-                AudioVideoToggle.Content = "Audio Only";
+                YouTubeVideoDialog videoDialog = new(Video, this.ActualWidth * 0.8, this.ActualHeight * 0.6);
+                videoDialog.Owner = this;
+                this.Opacity = 0.5;
+                MainWindowBlur.Radius = 8;
+                if (videoDialog.ShowDialog() == true)
+                {
+                    switch (videoDialog.VideoFormat)
+                    {
+                        case MediaType.Audio:
+                            Video.SetAsAudio();
+                            break;
+                        case MediaType.Video:
+                            Video.SetAsVideo();
+                            break;
+                    }
+                }
+                this.Opacity = 1;
+                MainWindowBlur.Radius = 0;
             }
         }
         private void OnStartUp(object sender, RoutedEventArgs e)
         {
-            ClientIDTextbox.Password = cryptography.Decrypt(Properties.Settings.Default.ClientID);
-            ClientSecretTextbox.Password = cryptography.Decrypt(Properties.Settings.Default.ClientSecret);
+            ClientIDTextbox.Password = Cryptography.Decrypt(Properties.Settings.Default.ClientID);
+            ClientSecretTextbox.Password = Cryptography.Decrypt(Properties.Settings.Default.ClientSecret);
             OUTPUT = Properties.Settings.Default.OutputDir;
             AUTOAUTH = Properties.Settings.Default.AutoAuth;
             SHUFFLE = Properties.Settings.Default.Shuffle;
             AUTOPLAY = Properties.Settings.Default.AutoPlay;
             BASSBOOST = Properties.Settings.Default.BassBoost;
-            directories = client.GetMUSICFOLDERS();
+            MusicFolders = client.GetMUSICFOLDERS();
 
             if (string.IsNullOrWhiteSpace(OUTPUT))
             {
@@ -532,7 +484,7 @@ namespace MP3DL
         }
         private void MouseClicked(object sender, MouseButtonEventArgs e)
         {
-            if (!MOUSEOVERMENU && main_menu.Tag.ToString() == "exp")
+            if (!MOUSEOVERMENU && MainMenu.Tag.Equals(ControlState.Active))
             {
                 AnimateMenu();
             }
@@ -568,16 +520,12 @@ namespace MP3DL
             {
                 mplayer.Rewind();
                 mplayer.Stop();
-
-                PlayButton.Tag = "np";
             }
             else switch (Playback)
                 {
                     case PlaybackType.Preview:
                         mplayer.Rewind();
                         mplayer.Stop();
-
-                        PlayButton.Tag = "np";
                         break;
                     case PlaybackType.FromFile:
                         NextSong();
@@ -590,7 +538,7 @@ namespace MP3DL
             DownloadProgressRing.Visibility = Visibility.Hidden;
         }
 
-        private void Spotify_PlaylistFetchingProgressChanged(object? sender, PlaylistProgressEventArgs e)
+        private void Spotify_PlaylistFetchingProgressChanged(object? sender, CollectionProgressEventArgs e)
         {
             DownloadProgressRing.Visibility = Visibility.Visible;
             DownloadStatusLabel.Content = $"{e.Finished}/{e.Total} songs fetched";

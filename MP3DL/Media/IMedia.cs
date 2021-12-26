@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Drawing;
 
-namespace MP3DL.Libraries
+namespace MP3DL.Media
 {
-    public enum Type
+    public enum MediaType
     {
         Audio,
         Video
@@ -22,5 +22,6 @@ namespace MP3DL.Libraries
         string ID { get; }
         bool IsVideo { get; }
         void SetTags(string Filename);
+        Image GetArt();
     }
 }

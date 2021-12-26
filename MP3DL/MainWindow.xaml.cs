@@ -13,7 +13,7 @@ namespace MP3DL
             InitializeComponent();
 
             QueueDataGrid.ItemsSource = QueueBindingList;
-            musiclist.ItemsSource = MusicList;
+            MusicDataGrid.ItemsSource = MusicBindingList;
 
             waiter.Interval = TimeSpan.FromMilliseconds(500);
             waiter.Tick += Waiter_Tick;
@@ -22,8 +22,8 @@ namespace MP3DL
             scanner.DoWork += Scan;
             scanner.RunWorkerCompleted += ScanComplete;
 
-            spotify.PlaylistFetchingProgressChanged += Spotify_PlaylistFetchingProgressChanged;
-            spotify.PlaylistFetchingDone += Spotify_PlaylistFetchingDone;
+            spotify.CollectionFetchingProgressChanged += Spotify_PlaylistFetchingProgressChanged;
+            spotify.CollectionFetchingDone += Spotify_PlaylistFetchingDone;
 
             downloader.DownloadCompleted += DownloadCompleted;
             downloader.ProgressChanged += DownloadProgressChanged;

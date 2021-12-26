@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
 
-namespace MP3DL.Libraries
+namespace MP3DL.Media
 {
     public class Spotify
     {
@@ -17,11 +17,11 @@ namespace MP3DL.Libraries
         public string ClientSecret { get; set; }
         public bool Authd { get; private set; } = false;
         public SpotifyTrack CurrentTrack { get; set; }
-        public SpotifyPlaylist CurrentPlaylist { get; set; }
+        public IMediaCollection<SpotifyTrack> CurrentMediaCollection { get; set; }
 
         private SpotifyClient Client;
-        public event EventHandler<PlaylistProgressEventArgs> PlaylistFetchingProgressChanged;
-        public event EventHandler PlaylistFetchingDone;
+        public event EventHandler<CollectionProgressEventArgs> CollectionFetchingProgressChanged;
+        public event EventHandler CollectionFetchingDone;
         public async Task Auth()
         {
             try
@@ -78,9 +78,25 @@ namespace MP3DL.Libraries
             try
             {
                 var temp = await Client.Playlists.Get(PLAYLIST_ID);
-                CurrentPlaylist = new(temp);
-                CurrentPlaylist.Tracks = await GetCurrentPlaylistTracks(temp);
-                OnPlaylistFetchingDone();
+                var tempplaylist = new SpotifyPlaylist(temp);
+                tempplaylist.Medias = await GetCurrentCollectionTracks(temp);
+                CurrentMediaCollection = tempplaylist;
+                OnCollectionFetchingDone();
+            }
+            catch (Exception)
+            {
+                throw new ArgumentException("Invalid ID! Please enter a valid track ID");
+            }
+        }
+        public async Task SetCurrentAlbum(string ALBUM_ID)
+        {
+            try
+            {
+                var temp = await Client.Albums.Get(ALBUM_ID);
+                var tempalbum = new SpotifyAlbum(temp);
+                tempalbum.Medias = await GetCurrentCollectionTracks(temp);
+                CurrentMediaCollection = tempalbum;
+                OnCollectionFetchingDone();
             }
             catch (Exception)
             {
@@ -99,7 +115,7 @@ namespace MP3DL.Libraries
             var item = search.Playlists.Items[Index].Id;
             return item;
         }
-        private async Task<List<SpotifyTrack>> GetCurrentPlaylistTracks(FullPlaylist Playlist)
+        private async Task<List<SpotifyTrack>> GetCurrentCollectionTracks(FullPlaylist Playlist)
         {
             var temp = new List<SpotifyTrack>();
 
@@ -125,6 +141,28 @@ namespace MP3DL.Libraries
             }
             return temp;
         }
+        private async Task<List<SpotifyTrack>> GetCurrentCollectionTracks(FullAlbum Album)
+        {
+            var temp = new List<SpotifyTrack>();
+
+            Debug.WriteLine($"--{Album.Tracks.Total} Total IDs found in playlist--");
+
+            int x = (int)Math.Ceiling((decimal)Album.Tracks.Total / 100);
+            int finished = 0;
+            int total = (int)Album.Tracks.Total;
+            Debug.WriteLine($"--Playlist going through {x} loop(s)--");
+            for (int i = 0; i < x; i++)
+            {
+                foreach (SimpleTrack item in Album.Tracks.Items)
+                {
+                    temp.Add(new SpotifyTrack(item, Album));
+                    finished++;
+                    OnPlaylistFetchingProgressChanged(finished, total);
+                }
+                await Offset(Album, i);
+            }
+            return temp;
+        }
         private async Task Offset(FullPlaylist Playlist, int Index)
         {
             int offset = (Index + 1) * 100;
@@ -133,21 +171,29 @@ namespace MP3DL.Libraries
                 new PlaylistGetItemsRequest { Offset = offset });
 
         }
+        private async Task Offset(FullAlbum Album, int Index)
+        {
+            int offset = (Index + 1) * 100;
+            Album.Tracks = await Client.Albums.GetTracks
+                (Album.Id,
+                new AlbumTracksRequest { Offset = offset });
+
+        }
         protected virtual void OnPlaylistFetchingProgressChanged(int Finished, int Total)
         {
-            PlaylistFetchingProgressChanged?.Invoke(this,
-                new PlaylistProgressEventArgs()
+            CollectionFetchingProgressChanged?.Invoke(this,
+                new CollectionProgressEventArgs()
                 {
                     Total = Total,
                     Finished = Finished,
                 });
         }
-        protected virtual void OnPlaylistFetchingDone()
+        protected virtual void OnCollectionFetchingDone()
         {
-            PlaylistFetchingDone?.Invoke(this, EventArgs.Empty);
+            CollectionFetchingDone?.Invoke(this, EventArgs.Empty);
         }
     }
-    public class PlaylistProgressEventArgs : EventArgs
+    public class CollectionProgressEventArgs : EventArgs
     {
         public int Finished { get; set; }
         public int Total { get; set; }

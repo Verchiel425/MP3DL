@@ -1,4 +1,4 @@
-﻿using MP3DL.Libraries;
+﻿using MP3DL.Media;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -45,10 +45,18 @@ namespace MP3DL
                 {
                     if (file.EndsWith(".mp3"))
                     {
-                        var music = new MP3File(file);
-                        if (!tmp.Contains(music))
+                        try
                         {
-                            tmp.Add(music);
+                            var music = new MP3File(file);
+
+                            if (!tmp.Contains(music))
+                            {
+                                tmp.Add(music);
+                            }
+                        }
+                        catch
+                        {
+
                         }
                     }
                 }

@@ -7,7 +7,7 @@ using YoutubeExplode.Common;
 using YoutubeExplode.Converter;
 using YoutubeExplode.Search;
 
-namespace MP3DL.Libraries
+namespace MP3DL.Media
 {
     public enum Result
     {
@@ -128,8 +128,8 @@ namespace MP3DL.Libraries
 
             string FileExtension = Video.Type switch
             {
-                Type.Video => "mp4",
-                Type.Audio => "mp3",
+                MediaType.Video => "mp4",
+                MediaType.Audio => "mp3",
                 _ => "mp3",
             };
             string CleanFilename = LibUtils.ClearChars(Video.Name);
@@ -145,7 +145,8 @@ namespace MP3DL.Libraries
             try
             {
                 await Client.Videos.DownloadAsync
-                            (Video.ID, System.IO.Path.Combine(Output, $"{CleanFilename}.{FileExtension}"), Progress, CancelToken);
+                            (Video.ID, System.IO.Path.Combine(Output,
+                            $"{CleanFilename}.{FileExtension}"), Progress, CancelToken);
             }
             catch (System.Net.Http.HttpRequestException)
             {

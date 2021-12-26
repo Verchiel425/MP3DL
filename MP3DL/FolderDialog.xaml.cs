@@ -20,14 +20,14 @@ namespace MP3DL
             ListControl.ItemsSource = list;
             StringList = new();
 
-            foreach (var directory in ((MainWindow)Application.Current.MainWindow).directories)
+            foreach (var directory in ((MainWindow)Application.Current.MainWindow).MusicFolders)
             {
                 list.Add(new CustomData(directory));
             }
         }
         BindingList<CustomData> list = new();
         public List<string> StringList { get; set; }
-        private void ok(object sender, RoutedEventArgs e)
+        private void Ok(object sender, RoutedEventArgs e)
         {
             this.DialogResult = true;
             foreach (var item in list)
@@ -37,7 +37,7 @@ namespace MP3DL
             this.Close();
         }
 
-        private void add(object sender, RoutedEventArgs e)
+        private void Add(object sender, RoutedEventArgs e)
         {
             VistaFolderBrowserDialog browser = new VistaFolderBrowserDialog();
             if (browser.ShowDialog() == true)
@@ -82,6 +82,12 @@ namespace MP3DL
                 if (other == null) return false;
                 return (this.path.Equals(other.path));
             }
+        }
+
+        private void cancel(object sender, RoutedEventArgs e)
+        {
+            this.DialogResult = false;
+            this.Close();
         }
     }
 }

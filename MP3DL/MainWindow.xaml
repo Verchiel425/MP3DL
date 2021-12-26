@@ -33,6 +33,9 @@
             </Setter>
         </Style>
     </Window.Resources>
+    <Window.Effect>
+        <BlurEffect x:Name="MainWindowBlur" KernelType="Gaussian" Radius="0"/>
+    </Window.Effect>
     <Window.Style>
         <Style TargetType="{x:Type Window}" 
                BasedOn="{StaticResource {x:Type Window}}"/>
@@ -52,13 +55,24 @@
                      Foreground="{x:Null}">
                     <Grid Background= 
                       "{DynamicResource {x:Static adonisUi:Brushes.Layer0BackgroundBrush}}">
-                        <Label Content="Welcome to MP3DL!" HorizontalAlignment="Center" VerticalAlignment="Center" FontFamily="Calibri" FontWeight="Normal" FontSize="40">
+                        <Label Content="Welcome to MP3DL!" HorizontalAlignment="Center" 
+                               VerticalAlignment="Center" FontFamily="Calibri" 
+                               FontWeight="Normal" FontSize="40"
+                               Margin="0,0,0,0">
                             <Label.Effect>
                                 <DropShadowEffect ShadowDepth="2"
                                               BlurRadius="8" Opacity="0.4"/>
                             </Label.Effect>
                         </Label>
-                        <Label Content="The menu is to your left!" HorizontalAlignment="Center" VerticalAlignment="Center" FontFamily="Calibri" FontWeight="Normal" FontSize="14" Opacity="0.3" Margin="0,65,0,0"/>
+                        <Label Content="The menu is to your left!" 
+                               HorizontalAlignment="Center" VerticalAlignment="Center" 
+                               FontFamily="Calibri" FontWeight="Normal" FontSize="14" 
+                               Opacity="0.3" Margin="0,0,0,60"/>
+                        <Label Content="Created by Yuan" 
+                               HorizontalAlignment="Center" VerticalAlignment="Center" 
+                               FontFamily="Calibri" FontWeight="Normal" FontSize="12" 
+                               Opacity="0.2" Margin="0,60,0,0"
+                               FontStyle="Italic"/>
                     </Grid>
                 </TabItem>
                 <TabItem x:Name="downloadtab" Header="Download" 
@@ -88,11 +102,11 @@
                         <Rectangle Height="2" Margin="0,91,0,0" 
                                Stroke="White"
                                VerticalAlignment="Top" Opacity="0.3" Grid.ColumnSpan="3"/>
-                        <Button x:Name="spotdl" Content="Download" HorizontalAlignment="Right" Margin="0,133,132,0" VerticalAlignment="Top" Width="104"
+                        <Button x:Name="DownloadButton" Content="Download" HorizontalAlignment="Right" Margin="0,133,132,0" VerticalAlignment="Top" Width="104"
                                 Background="{DynamicResource {x:Static adonisUi:Brushes.AccentInteractionBrush}}" FontSize="14" Click="DownloadButton_Clicked" Grid.Column="1" Height="25" Grid.ColumnSpan="2" IsEnabled="False"/>
-                        <Button x:Name="spotatq" Content="Add to Queue" HorizontalAlignment="Right" Margin="0,105,25,0" VerticalAlignment="Top" Width="104"
+                        <Button x:Name="AddToQueueButton" Content="Add to Queue" HorizontalAlignment="Right" Margin="0,105,25,0" VerticalAlignment="Top" Width="104"
                                 FontSize="14" Click="AddToQueueButton_Clicked" Grid.Column="2" Height="25" IsEnabled="True"/>
-                        <Button x:Name="spotcancel" Content="Cancel All" HorizontalAlignment="Right" Margin="0,161,25,0" VerticalAlignment="Top" Width="211"
+                        <Button x:Name="CancelAllButton" Content="Cancel All" HorizontalAlignment="Right" Margin="0,161,25,0" VerticalAlignment="Top" Width="211"
                                 FontSize="14" IsEnabled="False" Click="CancelAll_Clicked" Grid.Column="1" Height="25" Grid.ColumnSpan="2"/>
                         <Image 
                             x:Name="Art_Image" 
@@ -153,7 +167,7 @@
                                 TextTrimming="CharacterEllipsis"
                                 ToolTip="{Binding Text, RelativeSource={RelativeSource Self}}"><Run Text=""/></TextBlock>
                         </Label>
-                        <Button x:Name="spotdl_all" Content="Download All" HorizontalAlignment="Right" Margin="0,133,25,0" VerticalAlignment="Top" Width="104"
+                        <Button x:Name="DownloadAllButton" Content="Download All" HorizontalAlignment="Right" Margin="0,133,25,0" VerticalAlignment="Top" Width="104"
                             Background="{DynamicResource {x:Static adonisUi:Brushes.AccentInteractionBrush}}" FontSize="14" Click="DownloadAll_Clicked" Grid.Column="2" Height="25" IsEnabled="False"/>
                         <ProgressBar x:Name="ProgressBar" Height="3" Margin="61,126,133,0" VerticalAlignment="Top" BorderBrush="{x:Null}" Background="{x:Null}" Value="-1" Grid.ColumnSpan="3"/>
                         <Label x:Name="DownloadStatusLabel" Content="Idle" HorizontalAlignment="Left" Margin="71,146,86,0" VerticalAlignment="Top" FontWeight="Normal" FontSize="24" Height="30" Grid.ColumnSpan="2"/>
@@ -170,12 +184,12 @@
                             </mah:ProgressRing.Effect>
                         </mah:ProgressRing>
                         <Button 
-                            x:Name="AudioVideoToggle" 
-                            Content="Audio Only" 
+                            x:Name="MoreOptions" 
+                            Content="Options" 
                             HorizontalAlignment="Right" 
                             Margin="0,105,132,0" 
                             VerticalAlignment="Top" 
-                            Height="25" Width="65" Click="AudioVideoToggle_Clicked" 
+                            Height="25" Width="65" Click="MoreOptions_Clicked" 
                             FontSize="10" 
                             Background="{x:Null}" 
                             BorderBrush="{x:Null}" Visibility="Hidden" Grid.ColumnSpan="3" ScrollViewer.VerticalScrollBarVisibility="Visible"/>
@@ -202,7 +216,7 @@
                                Stroke="White"
                                VerticalAlignment="Top" Opacity="0.3"/>
                         <DataGrid 
-                            x:Name="musiclist" 
+                            x:Name="MusicDataGrid" 
                             AutoGenerateColumns="False"
                             Margin="10,140,10,10" 
                             GridLinesVisibility="None" 
@@ -247,8 +261,8 @@
                             </mah:ProgressRing.Effect>
                         </mah:ProgressRing>
                         <Button x:Name="managefoldersbutton" Content="Manage Folders" HorizontalAlignment="Left" Margin="32,101,0,0" VerticalAlignment="Top" FontSize="16" Background="{x:Null}" BorderBrush="{x:Null}" Click="ManageFoldersButton_Clicked" Opacity="0.4"/>
-                        <Button x:Name="autoplaybutton" Content="AutoPlay: On" HorizontalAlignment="Left" Margin="157,101,0,0" VerticalAlignment="Top" FontSize="16" Background="{x:Null}" BorderBrush="{x:Null}" Click="autoplaytoggle" Opacity="0.4"/>
-                        <Button x:Name="shufflebutton" Content="Shuffle: On" HorizontalAlignment="Left" Margin="263,101,0,0" VerticalAlignment="Top" FontSize="16" Background="{x:Null}" BorderBrush="{x:Null}" Click="shuffletoggle" Opacity="0.4"/>
+                        <Button x:Name="AutoPlayButton" Content="AutoPlay: On" HorizontalAlignment="Left" Margin="157,101,0,0" VerticalAlignment="Top" FontSize="16" Background="{x:Null}" BorderBrush="{x:Null}" Click="autoplaytoggle" Opacity="0.4"/>
+                        <Button x:Name="ShuffleButton" Content="Shuffle: On" HorizontalAlignment="Left" Margin="263,101,0,0" VerticalAlignment="Top" FontSize="16" Background="{x:Null}" BorderBrush="{x:Null}" Click="shuffletoggle" Opacity="0.4"/>
                     </Grid>
                 </TabItem>
                 <TabItem x:Name="authtab" Header="Auth" 
@@ -309,9 +323,9 @@
                         <Rectangle HorizontalAlignment="Stretch" Height="2" Margin="0,91,0,0" 
                                Stroke="White"
                                VerticalAlignment="Top" Opacity="0.3"/>
-                        <TextBox x:Name="OutputFolderTextbox" HorizontalAlignment="Left" Margin="203,0,0,11" TextWrapping="Wrap" VerticalAlignment="Bottom" Width="232" FontSize="16" IsEnabled="False"/>
-                        <TextBlock HorizontalAlignment="Left" Margin="50,0,0,15" TextWrapping="Wrap" Text="Change output folder:" VerticalAlignment="Bottom" FontSize="16" Foreground="White" Width="143" Height="20"/>
-                        <Button x:Name="browsedlfolder" Content="..." HorizontalAlignment="Left" Margin="434,0,0,11" VerticalAlignment="Bottom" Height="28" Width="37" FontSize="16" Click="BrowseOutputFolder_Clicked"/>
+                        <TextBox x:Name="OutputFolderTextbox" HorizontalAlignment="Left" Margin="203,330,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="232" FontSize="16" IsEnabled="False"/>
+                        <TextBlock HorizontalAlignment="Left" Margin="50,333,0,0" TextWrapping="Wrap" Text="Change output folder:" VerticalAlignment="Top" FontSize="16" Foreground="White" Width="143" Height="20"/>
+                        <Button x:Name="browsedlfolder" Content="..." HorizontalAlignment="Left" Margin="434,330,0,0" VerticalAlignment="Top" Height="28" Width="37" FontSize="16" Click="BrowseOutputFolder_Clicked"/>
                         <CheckBox x:Name="AutoAuthCheckbox" Content="Authenticate on start-up" HorizontalAlignment="Left" Margin="50,156,0,0" VerticalAlignment="Top" FontSize="16" Click="AutoAuthCheckbox_Clicked"/>
                         <TextBlock HorizontalAlignment="Left" Margin="50,113,0,0" TextWrapping="Wrap" Text="On Start Up" VerticalAlignment="Top" Foreground="White" FontSize="24"/>
                         <TextBlock HorizontalAlignment="Left" Margin="50,218,0,0" TextWrapping="Wrap" Text="Playback" VerticalAlignment="Top" Foreground="White" FontSize="24"/>
@@ -321,7 +335,8 @@
             </TabControl>
             <Grid x:Name="player" 
                   Margin="50,0,0,0" 
-                  Background="{DynamicResource {x:Static adonisUi:Brushes.Layer4BackgroundBrush}}" VerticalAlignment="Bottom" Height="60" Tag="nexp"
+                  Background="{DynamicResource {x:Static adonisUi:Brushes.Layer4BackgroundBrush}}" 
+                  VerticalAlignment="Bottom" Height="60" Tag="{x:Static local:ControlState.Inactive}"
                   >
                 <Grid.Effect>
                     <DropShadowEffect ShadowDepth="0.5" Direction="90" BlurRadius="5" Opacity="0.4"/>
@@ -402,11 +417,13 @@
                     Thumb.DragCompleted="PlaybackPositionSlider_Dragged" Opacity="0.5"/>
 
             </Grid>
-            <Grid x:Name="main_menu" 
+            <Grid x:Name="MainMenu" 
             Background=
             "{DynamicResource {x:Static adonisUi:Brushes.Layer1BackgroundBrush}}" 
             HorizontalAlignment="Left" 
-            Width="50" AutomationProperties.Name="main_menu" Tag="nexp" MouseEnter="MouseOnMenu" MouseLeave="MouseOutsideMenu">
+            Width="50" AutomationProperties.Name="main_menu" 
+                  Tag="{x:Static local:ControlState.Inactive}" 
+                  MouseEnter="MouseOnMenu" MouseLeave="MouseOutsideMenu">
                 <Grid.Effect>
                     <DropShadowEffect ShadowDepth="0.5" BlurRadius="8" Opacity="0.8"/>
                 </Grid.Effect>

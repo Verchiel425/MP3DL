@@ -20,30 +20,30 @@ namespace MP3DL
                 DecelerationRatio = 0.6
             };
             storyboard.Children.Add(changeWidth);
-            Storyboard.SetTarget(storyboard, main_menu);
+            Storyboard.SetTarget(storyboard, MainMenu);
             Storyboard.SetTargetProperty(storyboard, new PropertyPath(Grid.WidthProperty));
 
             storyboard.Stop();
-            if (main_menu.Width > x && main_menu.Tag.ToString() == "exp")
+            if (MainMenu.Width > x && MainMenu.Tag.Equals(ControlState.Active))
             {
-                changeWidth.From = main_menu.Width;
+                changeWidth.From = MainMenu.Width;
                 changeWidth.To = x;
                 storyboard.Begin();
             }
-            else if (main_menu.Width < y && main_menu.Tag.ToString() == "nexp")
+            else if (MainMenu.Width < y && MainMenu.Tag.Equals(ControlState.Inactive))
             {
-                changeWidth.From = main_menu.Width;
+                changeWidth.From = MainMenu.Width;
                 changeWidth.To = y;
                 storyboard.Begin();
             }
 
-            if (main_menu.Tag.ToString() == "nexp")
+            if (MainMenu.Tag.Equals(ControlState.Inactive))
             {
-                main_menu.Tag = "exp";
+                MainMenu.Tag = ControlState.Active;
             }
             else
             {
-                main_menu.Tag = "nexp";
+                MainMenu.Tag = ControlState.Inactive;
             }
         }
         private void AnimatePlayer()
@@ -107,7 +107,7 @@ namespace MP3DL
             title.Stop();
             artist.Stop();
 
-            if (player.Height > x && player.Tag.ToString() == "exp")
+            if (player.Height > x && player.Tag.Equals(ControlState.Active))
             {
                 changeHeight.From = player.Height;
                 changeHeight.To = x;
@@ -120,7 +120,7 @@ namespace MP3DL
                 title.Begin();
                 storyboard.Begin();
             }
-            else if (player.Height < y && player.Tag.ToString() == "nexp")
+            else if (player.Height < y && player.Tag.Equals(ControlState.Inactive))
             {
                 changeHeight.From = player.Height;
                 changeHeight.To = y;
@@ -134,13 +134,13 @@ namespace MP3DL
                 storyboard.Begin();
             }
 
-            if (player.Tag.ToString() == "nexp")
+            if (player.Tag.Equals(ControlState.Inactive))
             {
-                player.Tag = "exp";
+                player.Tag = ControlState.Active;
             }
             else
             {
-                player.Tag = "nexp";
+                player.Tag = ControlState.Inactive;
             }
         }
         private void FadeTab()
@@ -159,7 +159,7 @@ namespace MP3DL
             Storyboard.SetTargetProperty(storyboard, new PropertyPath(TabControl.OpacityProperty));
             storyboard.Begin();
         }
-        private void FadeOutElements(UIElement control, DependencyProperty property)
+        private void FadeOutElements(UIElement control, DependencyProperty property, double originalopacity)
         {
             Storyboard storyboard = new();
             var changeOpacity = new DoubleAnimation
@@ -167,7 +167,7 @@ namespace MP3DL
                 Duration = new Duration(TimeSpan.FromMilliseconds(100)),
                 AccelerationRatio = 0.4,
                 DecelerationRatio = 0.6,
-                From = 1,
+                From = originalopacity,
                 To = 0
             };
             storyboard.Children.Add(changeOpacity);
@@ -179,7 +179,7 @@ namespace MP3DL
                 control.Visibility = Visibility.Hidden;
             };
         }
-        private void FadeInElements(UIElement control, DependencyProperty property)
+        private void FadeInElements(UIElement control, DependencyProperty property, double originalopacity)
         {
             Storyboard storyboard = new();
             var changeOpacity = new DoubleAnimation
@@ -188,7 +188,7 @@ namespace MP3DL
                 AccelerationRatio = 0.4,
                 DecelerationRatio = 0.6,
                 From = 0,
-                To = 1
+                To = originalopacity
             };
             storyboard.Children.Add(changeOpacity);
             Storyboard.SetTarget(storyboard, control);

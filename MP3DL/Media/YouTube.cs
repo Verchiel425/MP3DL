@@ -2,13 +2,13 @@
 using System.Threading.Tasks;
 using YoutubeExplode;
 
-namespace MP3DL.Libraries
+namespace MP3DL.Media
 {
     public class YouTube
     {
         private YoutubeClient Client;
         public YouTubeVideo CurrentVideo { get; private set; }
-        public async Task SetCurrentVid(string URL, Type Type)
+        public async Task SetCurrentVid(string URL, MediaType Type)
         {
             try
             {
@@ -27,7 +27,7 @@ namespace MP3DL.Libraries
             {
                 Client = new YoutubeClient();
                 var temp = await Client.Videos.GetAsync(URL);
-                CurrentVideo = new(temp, Type.Audio);
+                CurrentVideo = new(temp, MediaType.Audio);
             }
             catch
             {

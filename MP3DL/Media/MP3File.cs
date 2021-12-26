@@ -3,9 +3,9 @@ using System.Drawing;
 using System.IO;
 using System.Windows.Media.Imaging;
 
-namespace MP3DL.Libraries
+namespace MP3DL.Media
 {
-    class MP3File : IEquatable<MP3File>, IComparable<MP3File>
+    public class MP3File : IEquatable<MP3File>, IComparable<MP3File>
     {
         public string Filename { get; set; }
         public string Year { get; set; }
@@ -38,6 +38,10 @@ namespace MP3DL.Libraries
 
             var ts = TagLib.File.Create(this.Filename);
             Title = ts.Tag.Title;
+            if (String.IsNullOrWhiteSpace(Title))
+            {
+                Title = FromFilename();
+            }
             Authors = ts.Tag.Performers;
             PrintedAuthors = PrintAuthors();
             Album = ts.Tag.Album;
@@ -111,6 +115,20 @@ namespace MP3DL.Libraries
 
             else
                 return Title.CompareTo(other.Title);
+        }
+        public string FromFilename()
+        {
+            string isolated = Filename;
+            if (Filename.Contains("\\"))
+            {
+                int lastslash = Filename.LastIndexOf("\\");
+                isolated = Filename.Substring(lastslash + 1, (Filename.Length - 1) - lastslash);
+            }
+            if (isolated.Contains(".mp3"))
+            {
+                isolated = isolated[0..^4];
+            }
+            return isolated;
         }
     }
 }

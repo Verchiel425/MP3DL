@@ -1,5 +1,4 @@
-﻿using System;
-using System.Drawing;
+﻿using System.Drawing;
 using System.IO;
 using System.Windows.Media.Imaging;
 
@@ -33,23 +32,27 @@ namespace MP3DL
             }
             return "";
         }
-        public static int GetLinkType(string LINK)
+        public static FilteredLink FilterLink(string LINK)
         {
             if (LINK.Contains("/track/"))
             {
-                return 0;
+                return new FilteredLink(SpotifyID(LINK), LinkType.SpotifyTrack);
             }
             else if (LINK.Contains("/playlist/"))
             {
-                return 1;
+                return new FilteredLink(SpotifyID(LINK), LinkType.SpotifyPlaylist);
             }
-            else if (LINK.Contains("youtube.com") || LINK.Contains("youtu.be"))
+            else if (LINK.Contains("/album/"))
             {
-                return 2;
+                return new FilteredLink(SpotifyID(LINK), LinkType.SpotifyAlbum);
+            }
+            else if (LINK.Contains("youtube.com/watch") || LINK.Contains("youtu.be"))
+            {
+                return new FilteredLink(LINK, LinkType.YouTubeVideo);
             }
             else
             {
-                return 3;
+                return new FilteredLink(LINK, LinkType.PlainText);
             }
         }
         public static BitmapImage ToBitmapImage(Image Image)

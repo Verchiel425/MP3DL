@@ -5,7 +5,7 @@ using System.IO;
 using System.Net;
 using System.Windows.Threading;
 
-namespace MP3DL
+namespace MP3DL.Media.Audio
 {
     class MusicPlayer
     {

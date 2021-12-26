@@ -1,6 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+	<CefSharpAnyCpuSupport>true</CefSharpAnyCpuSupport>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net6.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
@@ -10,7 +11,10 @@
     <StartupObject>MP3DL.App</StartupObject>
     <AssemblyVersion>1.0.1.1</AssemblyVersion>
     <FileVersion>1.0.1.1</FileVersion>
-    <Platforms>AnyCPU;x86;x64</Platforms>
+    <Platforms>AnyCPU;x86</Platforms>
+	<Platforms>$(Platform)</Platforms>
+	<PlatformName>$(Platform)</PlatformName>
+	<PlatformTarget>$(Platform)</PlatformTarget>
   </PropertyGroup>
 
   <ItemGroup>
@@ -47,6 +51,8 @@
   <ItemGroup>
     <PackageReference Include="AdonisUI" Version="1.17.1" />
     <PackageReference Include="AdonisUI.ClassicTheme" Version="1.17.1" />
+    <PackageReference Include="CefSharp.Common.NETCore" Version="96.0.180" />
+    <PackageReference Include="CefSharp.Wpf.NETCore" Version="96.0.180" />
     <PackageReference Include="MahApps.Metro" Version="2.4.9" />
     <PackageReference Include="NAudio" Version="2.0.1" />
     <PackageReference Include="Ookii.Dialogs.Wpf" Version="5.0.0" />

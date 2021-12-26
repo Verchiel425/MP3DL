@@ -1,4 +1,5 @@
-﻿using MP3DL.Libraries;
+﻿using MP3DL.Media;
+using MP3DL.Encryption;
 using NAudio.Wave;
 using System;
 using System.Diagnostics;
@@ -22,16 +23,23 @@ namespace MP3DL
 
             spotify.ClientID = ID;
             spotify.ClientSecret = SECRET;
-            await Task.Run(() => spotify.Auth());
+            try
+            {
+                await Task.Run(() => spotify.Auth());
+            }
+            catch
+            {
+
+            }
 
             Debug.WriteLine("--Auth Attempt Complete!--");
             if (spotify.Authd)
             {
                 AuthMenuItem.Source = new BitmapImage(new Uri("resources\\icon_unlock.png", UriKind.Relative));
-                Properties.Settings.Default.ClientID = cryptography.Encrypt(ID);
-                Properties.Settings.Default.ClientSecret = cryptography.Encrypt(SECRET);
+                Properties.Settings.Default.ClientID = Cryptography.Encrypt(ID);
+                Properties.Settings.Default.ClientSecret = Cryptography.Encrypt(SECRET);
                 LinkTextbox.IsEnabled = true;
-                DownloadControlEnabled(true);
+                DownloadControlsEnabled(true);
                 AuthStatusLabel.Content = "AUTHENTICATED";
             }
             else
@@ -42,35 +50,54 @@ namespace MP3DL
             }
             AuthProgressRing.Visibility = Visibility.Hidden;
         }
-        private void UpdatePreview(IMedia Media)
+        private void UpdatePreview(IMedia Media, InputFrom Input)
         {
-            Art_Image.Source = Utils.ToBitmapImage(Media.Art);
+            Art_Image.Source = Utils.ToBitmapImage(Media.GetArt());
             Title_Textblock.Text = Media.Title;
             FirstAuthor_Textblock.Text = Media.FirstAuthor;
 
-            PreviewItem = Media;
-
+            if (Input == InputFrom.User)
+            {
+                MediaInput = Media;
+            }
+            CurrentlyPreviewing = Media;
             SetPreviewToPlayer(Media);
 
             PreviewProgressRing.Visibility = Visibility.Hidden;
         }
-        private void UpdatePreview(SpotifyPlaylist Playlist)
+        private void UpdatePreview(IMediaCollection<SpotifyTrack> MediaCollection)
         {
-            Art_Image.Source = Utils.ToBitmapImage(Playlist.Art);
-            Title_Textblock.Text = Playlist.Title;
-            FirstAuthor_Textblock.Text = Playlist.Author;
+            Art_Image.Source = Utils.ToBitmapImage(MediaCollection.Art);
+            Title_Textblock.Text = MediaCollection.Title;
+            FirstAuthor_Textblock.Text = MediaCollection.Author;
 
-            PreviewItem = Playlist;
+            MediaInput = MediaCollection;
+            CurrentlyPreviewing = MediaCollection;
 
             PreviewProgressRing.Visibility = Visibility.Hidden;
         }
-        private void ClearPreview()
+        private void UpdatePreview(object Item, InputFrom Input)
+        {
+            switch (Item)
+            {
+                case IMediaCollection<SpotifyTrack> MediaCollection:
+                    UpdatePreview(MediaCollection);
+                    break;
+                case IMedia Media:
+                    UpdatePreview(Media, Input);
+                    break;
+            }
+        }
+        private void ClearPreview(InputFrom Input)
         {
             Title_Textblock.Text = "Nothing!";
             FirstAuthor_Textblock.Text = "";
             Art_Image.Source = new BitmapImage(new Uri("resources\\default_art.jpg", UriKind.Relative));
 
-            PreviewItem = null;
+            if (Input == InputFrom.User)
+            {
+                MediaInput = null;
+            }
 
             PreviewProgressRing.Visibility = Visibility.Hidden;
         }
@@ -80,18 +107,29 @@ namespace MP3DL
             DownloadProgressRing.Visibility = Visibility.Visible;
 
             int temp = 0;
-            if (Item is IMedia Media)
+
+            switch (Item)
             {
-                QueueBindingList.Add(Media);
-                temp++;
-            }
-            else if (Item is SpotifyPlaylist Playlist)
-            {
-                foreach (var Track in Playlist.Tracks)
-                {
-                    QueueBindingList.Add(Track);
+                case IMedia Media:
+                    switch (Media)
+                    {
+                        case YouTubeVideo Video:
+                            Media = new YouTubeVideo(Video);
+                            break;
+                        case SpotifyTrack Track:
+                            Media = new SpotifyTrack(Track);
+                            break;
+                    }
+                    QueueBindingList.Add(Media);
                     temp++;
-                }
+                    break;
+                case IMediaCollection<SpotifyTrack> MediaCollection:
+                    foreach (var CollectionMedia in MediaCollection.Medias)
+                    {
+                        QueueBindingList.Add(CollectionMedia);
+                        temp++;
+                    }
+                    break;
             }
 
             DownloadStatusLabel.Content = $"{temp} items added to queue";
@@ -101,26 +139,24 @@ namespace MP3DL
         {
             QueueBindingList.Remove(Media);
         }
-        private void DownloadControlEnabled(bool ENABLED)
+        private void DownloadControlsEnabled(bool ENABLED)
         {
-            if (ENABLED)
+            CancelAllButton.IsEnabled = !ENABLED;
+            AddToQueueButton.IsEnabled = ENABLED;
+            LinkTextbox.IsEnabled = ENABLED;
+            DownloadButton.IsEnabled = ENABLED;
+            DownloadAllButton.IsEnabled = ENABLED;
+            if (MediaInput is YouTubeVideo Video)
             {
-                spotcancel.IsEnabled = false;
-                LinkTextbox.IsEnabled = true;
-                spotdl.IsEnabled = true;
-                spotdl_all.IsEnabled = true;
-                if (PreviewItem is YouTubeVideo Video && Video.IsVideo)
+                MoreOptions.Visibility = ENABLED switch
                 {
-                    AudioVideoToggle.Visibility = Visibility.Visible;
-                }
+                    true => Visibility.Visible,
+                    false => Visibility.Hidden,
+                }; ;
             }
             else
             {
-                AudioVideoToggle.Visibility = Visibility.Hidden;
-                spotcancel.IsEnabled = true;
-                LinkTextbox.IsEnabled = false;
-                spotdl.IsEnabled = false;
-                spotdl_all.IsEnabled = false;
+                MoreOptions.Visibility = Visibility.Hidden;
             }
         }
         private async Task InitializeDownload(IMedia Media)
@@ -148,7 +184,7 @@ namespace MP3DL
                 };
             }));
         }
-        public void DownloadProgressChanged(object? sender, Libraries.DownloadProgressEventArgs e)
+        public void DownloadProgressChanged(object? sender, Media.DownloadProgressEventArgs e)
         {
             Dispatcher.Invoke(new Action(delegate
             {
@@ -174,13 +210,12 @@ namespace MP3DL
         }
         private void SetPreviewToPlayer(IMedia Media)
         {
-            if (Media is SpotifyTrack)
+            if (Media is SpotifyTrack Track)
             {
-                var Track = Media as SpotifyTrack;
                 if (mplayer.WaveOut.PlaybackState != PlaybackState.Playing)
                 {
                     Playback = PlaybackType.Preview;
-                    playerArt.Source = Utils.ToBitmapImage(Track.Art);
+                    playerArt.Source = Utils.ToBitmapImage(Track.GetArt());
                     PlayerTitleTextblock.Text = Track.Title;
                     PlayerArtistTextblock.Text = Track.FirstAuthor;
                     if (!string.IsNullOrWhiteSpace(Track.PreviewURL))
@@ -221,86 +256,95 @@ namespace MP3DL
         }
         private void PlayerControlsEnabled(bool ENABLED)
         {
-            if (ENABLED)
+            double opacity = ENABLED switch
             {
-                switch (Playback)
-                {
-                    case PlaybackType.Preview:
-                        Image_PlayButton.Opacity = 1;
-                        img_prevb.Opacity = 0.5;
-                        img_nextb.Opacity = 0.5;
-                        PlaybackPositionSlider.Opacity = 1;
-                        PlayButton.IsEnabled = true;
-                        prevb.IsEnabled = false;
-                        nextb.IsEnabled = false;
-                        PlaybackPositionSlider.IsEnabled = true;
-                        break;
-                    case PlaybackType.FromFile:
-                        Image_PlayButton.Opacity = 1;
-                        img_prevb.Opacity = 1;
-                        img_nextb.Opacity = 1;
-                        PlaybackPositionSlider.Opacity = 1;
-                        PlayButton.IsEnabled = true;
-                        prevb.IsEnabled = true;
-                        nextb.IsEnabled = true;
-                        PlaybackPositionSlider.IsEnabled = true;
-                        break;
-                }
-            }
-            else
+                true => 1,
+                false => 0.5,
+            };
+            switch (Playback)
             {
-                switch (Playback)
-                {
-                    case PlaybackType.Preview:
-                        Image_PlayButton.Opacity = 0.5;
-                        img_prevb.Opacity = 0.5;
-                        img_nextb.Opacity = 0.5;
-                        PlaybackPositionSlider.Opacity = 0.5;
-                        PlayButton.IsEnabled = false;
-                        prevb.IsEnabled = false;
-                        nextb.IsEnabled = false;
-                        PlaybackPositionSlider.IsEnabled = false;
-                        break;
-                    case PlaybackType.FromFile:
-                        Image_PlayButton.Opacity = 0.5;
-                        img_prevb.Opacity = 0.5;
-                        img_nextb.Opacity = 0.5;
-                        PlaybackPositionSlider.Opacity = 0.5;
-                        PlayButton.IsEnabled = false;
-                        prevb.IsEnabled = false;
-                        nextb.IsEnabled = false;
-                        PlaybackPositionSlider.IsEnabled = false;
-                        break;
-                }
+                case PlaybackType.Preview:
+                    Image_PlayButton.Opacity = opacity;
+                    img_prevb.Opacity = 0.5;
+                    img_nextb.Opacity = 0.5;
+                    PlaybackPositionSlider.Opacity = opacity;
+                    PlayButton.IsEnabled = ENABLED;
+                    prevb.IsEnabled = !ENABLED;
+                    nextb.IsEnabled = !ENABLED;
+                    PlaybackPositionSlider.IsEnabled = ENABLED;
+                    break;
+                case PlaybackType.FromFile:
+                    Image_PlayButton.Opacity = opacity;
+                    img_prevb.Opacity = opacity;
+                    img_nextb.Opacity = opacity;
+                    PlaybackPositionSlider.Opacity = opacity;
+                    PlayButton.IsEnabled = ENABLED;
+                    prevb.IsEnabled = ENABLED;
+                    nextb.IsEnabled = ENABLED;
+                    PlaybackPositionSlider.IsEnabled = ENABLED;
+                    break;
             }
         }
         private void NextSong()
         {
-            if (CurrentIndexInPlayedSongs == PlayedSongs.Count - 1)
+            InputType = InputFrom.Code;
+            if (!PlayedSongs.IsNextNull())
             {
+                PlayedSongs.Next();
+                MusicDataGrid.SelectedItem = PlayedSongs.GetCurrent();
+            }
+            else
+            {
+                int nextindex;
                 if (!SHUFFLE)
                 {
-                    int nextindex = musiclist.SelectedIndex + 1;
-                    if (nextindex > musiclist.Items.Count - 1)
+                    nextindex = MusicDataGrid.SelectedIndex + 1;
+                    if (nextindex > MusicDataGrid.Items.Count - 1)
                     {
-                        musiclist.SelectedIndex = 0;
-                    }
-                    else
-                    {
-                        musiclist.SelectedIndex = nextindex;
+                        nextindex = 0;
                     }
                 }
                 else
                 {
-                    int nextindex = new Random().Next(0, musiclist.Items.Count - 1);
-                    musiclist.SelectedIndex = nextindex;
+                    nextindex = new Random().Next(0, MusicDataGrid.Items.Count - 1);
+                    while (nextindex == MusicDataGrid.SelectedIndex)
+                    {
+                        nextindex = new Random().Next(0, MusicDataGrid.Items.Count - 1);
+                    }
                 }
+                PlayedSongs.Add((MP3File)MusicDataGrid.Items[nextindex]);
+                MusicDataGrid.SelectedItem = MusicDataGrid.Items[nextindex];
+            }
+        }
+        private void PrevSong()
+        {
+            InputType = InputFrom.Code;
+            if (!PlayedSongs.IsPrevZero())
+            {
+                PlayedSongs.Prev();
+                MusicDataGrid.SelectedItem = PlayedSongs.GetCurrent();
             }
             else
             {
-                DoNotAdd = true;
-                CurrentIndexInPlayedSongs += 1;
-                musiclist.SelectedItem = PlayedSongs[CurrentIndexInPlayedSongs];
+                int previndex;
+                if (!SHUFFLE)
+                {
+                    previndex = MusicDataGrid.SelectedIndex - 1;
+                    if (previndex < 0)
+                    {
+                        previndex = MusicDataGrid.Items.Count - 1;
+                    }
+                }
+                else
+                {
+                    previndex = new Random().Next(0, MusicDataGrid.Items.Count - 1);
+                    while (previndex == MusicDataGrid.SelectedIndex)
+                    {
+                        previndex = new Random().Next(0, MusicDataGrid.Items.Count - 1);
+                    }
+                }
+                PlayedSongs.InsertAtReaderHead((MP3File)MusicDataGrid.Items[previndex]);
+                MusicDataGrid.SelectedItem = MusicDataGrid.Items[previndex];
             }
         }
         public async Task<string> Search_PlainText()
@@ -331,7 +375,7 @@ namespace MP3DL
         }
         private void RefreshMusicList()
         {
-            scanner.RunWorkerAsync(directories);
+            scanner.RunWorkerAsync(MusicFolders);
         }
         private void SortBy(SortType sorttype)
         {
@@ -380,7 +424,7 @@ namespace MP3DL
                         });
                         break;
                 }
-                MusicList.Clear();
+                MusicBindingList.Clear();
                 delivery.Start();
             }
         }

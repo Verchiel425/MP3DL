@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 
-namespace MP3DL.Libraries
+namespace MP3DL.Media
 {
-    public class SpotifyPlaylist : List<SpotifyTrack>
+    public class SpotifyPlaylist : IMediaCollection<SpotifyTrack>
     {
         public SpotifyPlaylist(FullPlaylist Playlist)
         {
@@ -17,13 +17,13 @@ namespace MP3DL.Libraries
             Art = System.Drawing.Image.FromStream(ImageStream);
 
             ID = Playlist.Id;
-            TrackCount = (uint)Playlist.Tracks.Total;
+            MediaCount = (uint)Playlist.Tracks.Total;
         }
         public string Title { get; private set; }
         public string Author { get; private set; }
         public System.Drawing.Image? Art { get; set; }
         public string ID { get; private set; }
-        public uint TrackCount { get; private set; }
-        public List<SpotifyTrack> Tracks { get; internal set; }
+        public uint MediaCount { get; private set; }
+        public List<SpotifyTrack> Medias { get; internal set; }
     }
 }
