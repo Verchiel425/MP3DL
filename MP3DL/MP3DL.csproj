@@ -63,6 +63,14 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Reference Include="Encryption">
+      <HintPath>..\Encryption\bin\Release\net6.0\Encryption.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+
+
+  <ItemGroup>
     <Resource Include="resources\default_art.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>

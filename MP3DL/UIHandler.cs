@@ -535,6 +535,20 @@ namespace MP3DL
             DownloadProgressRing.Visibility = Visibility.Visible;
             DownloadStatusLabel.Content = $"{e.Finished}/{e.Total} songs fetched";
         }
+        private void FetchDefault_Entered(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            FetchDefault.Content = "Click here to fetch default info";
+        }
+        private void FetchDefault_Left(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            FetchDefault.Content = "Can't be bothered to use your own?";
+        }
+
+        private void FetchDefault_Clicked(object sender, RoutedEventArgs e)
+        {
+            ClientIDTextbox.Password = Encryption.Cryptography.Decrypt("N44WaH/WXcq+HY2FpXWJX5TjCCFc5mJdF7s5axOqMLvJ/d8AysCAtyvOOtL7UbRwvjZJhmmUNF0U4vzQNHTW3bAZ9JP6rRvJypXmRCcKHqM=");
+            ClientSecretTextbox.Password = Encryption.Cryptography.Decrypt("vGd1VR5mFB118g4+HEsd3S95XppW7JIcuG7Eo4SKDiYpGI3wXsI/xFg6NbzLUdwMeeo35lK1LUlBFTSTu9rVmH93tm7A95ZpSDZx1PZ5118=");
+        }
         #endregion
     }
 }
