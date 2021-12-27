@@ -250,25 +250,25 @@ namespace MP3DL
                     case LinkType.SpotifyTrack:
                         MediaInput = null;
                         await spotify.SetCurrentTrack(link.Link);
-                        MoreOptions.Visibility = Visibility.Hidden;
+                        FormatToggle.Visibility = Visibility.Hidden;
                         UpdatePreview(spotify.CurrentTrack, InputFrom.User);
                         break;
                     case LinkType.SpotifyPlaylist:
                         MediaInput = null;
                         await spotify.SetCurrentPlaylist(link.Link);
-                        MoreOptions.Visibility = Visibility.Hidden;
+                        FormatToggle.Visibility = Visibility.Hidden;
                         UpdatePreview(spotify.CurrentMediaCollection);
                         break;
                     case LinkType.SpotifyAlbum:
                         MediaInput = null;
                         await spotify.SetCurrentAlbum(link.Link);
-                        MoreOptions.Visibility = Visibility.Hidden;
+                        FormatToggle.Visibility = Visibility.Hidden;
                         UpdatePreview(spotify.CurrentMediaCollection);
                         break;
                     case LinkType.YouTubeVideo:
                         MediaInput = null;
                         await youtube.SetCurrentVid(link.Link);
-                        MoreOptions.Visibility = Visibility.Visible;
+                        FormatToggle.Visibility = Visibility.Visible;
                         UpdatePreview(youtube.CurrentVideo, InputFrom.User);
                         break;
                     case LinkType.YouTubePlaylist:
@@ -281,7 +281,7 @@ namespace MP3DL
             }
             catch (ArgumentException)
             {
-                MoreOptions.Visibility = Visibility.Hidden;
+                FormatToggle.Visibility = Visibility.Hidden;
                 ClearPreview(InputFrom.User);
             }
         }
@@ -421,28 +421,20 @@ namespace MP3DL
                 SetPreviewToPlayer(Media);
             }
         }
-        private void MoreOptions_Clicked(object sender, RoutedEventArgs e)
+        private void FormatToggle_Clicked(object sender, RoutedEventArgs e)
         {
             if (MediaInput is YouTubeVideo Video)
             {
-                YouTubeVideoDialog videoDialog = new(Video, this.ActualWidth * 0.8, this.ActualHeight * 0.6);
-                videoDialog.Owner = this;
-                this.Opacity = 0.5;
-                MainWindowBlur.Radius = 8;
-                if (videoDialog.ShowDialog() == true)
+                if (Video.IsVideo)
                 {
-                    switch (videoDialog.VideoFormat)
-                    {
-                        case MediaType.Audio:
-                            Video.SetAsAudio();
-                            break;
-                        case MediaType.Video:
-                            Video.SetAsVideo();
-                            break;
-                    }
+                    Video.IsVideo = false;
+                    FormatToggle.Content = "Audio";
                 }
-                this.Opacity = 1;
-                MainWindowBlur.Radius = 0;
+                else
+                {
+                    Video.IsVideo = true;
+                    FormatToggle.Content = "Video";
+                }
             }
         }
         private void OnStartUp(object sender, RoutedEventArgs e)

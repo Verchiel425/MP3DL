@@ -39,13 +39,13 @@ namespace MP3DL
             {
                 MediaInput = null;
                 await spotify.SetCurrentTrack(await Search_PlainText());
-                MoreOptions.Visibility = Visibility.Hidden;
+                FormatToggle.Visibility = Visibility.Hidden;
 
                 UpdatePreview(spotify.CurrentTrack, InputFrom.User);
             }
             catch (ArgumentException)
             {
-                MoreOptions.Visibility = Visibility.Hidden;
+                FormatToggle.Visibility = Visibility.Hidden;
                 ClearPreview(InputFrom.User);
             }
         }

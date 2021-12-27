@@ -184,14 +184,13 @@
                             </mah:ProgressRing.Effect>
                         </mah:ProgressRing>
                         <Button 
-                            x:Name="MoreOptions" 
-                            Content="Options" 
+                            x:Name="FormatToggle" 
+                            Content="Audio" 
                             HorizontalAlignment="Right" 
                             Margin="0,105,132,0" 
                             VerticalAlignment="Top" 
-                            Height="25" Width="65" Click="MoreOptions_Clicked" 
+                            Height="25" Width="65" Click="FormatToggle_Clicked" 
                             FontSize="10" 
-                            Background="{x:Null}" 
                             BorderBrush="{x:Null}" Visibility="Hidden" Grid.ColumnSpan="3" ScrollViewer.VerticalScrollBarVisibility="Visible"/>
                         <TextBlock x:Name="QueueCounter" HorizontalAlignment="Left" Margin="10,0,0,7" TextWrapping="Wrap" VerticalAlignment="Bottom" FontSize="14" Height="17" Foreground="White" Text="Nothing in queue..."/>
                     </Grid>

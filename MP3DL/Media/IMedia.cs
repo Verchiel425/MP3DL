@@ -3,11 +3,6 @@ using System.Drawing;
 
 namespace MP3DL.Media
 {
-    public enum MediaType
-    {
-        Audio,
-        Video
-    }
     public interface IMedia : IEquatable<IMedia>
     {
         string Name { get; }

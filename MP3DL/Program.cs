@@ -148,7 +148,7 @@ namespace MP3DL
             DownloadAllButton.IsEnabled = ENABLED;
             if (MediaInput is YouTubeVideo Video)
             {
-                MoreOptions.Visibility = ENABLED switch
+                FormatToggle.Visibility = ENABLED switch
                 {
                     true => Visibility.Visible,
                     false => Visibility.Hidden,
@@ -156,7 +156,7 @@ namespace MP3DL
             }
             else
             {
-                MoreOptions.Visibility = Visibility.Hidden;
+                FormatToggle.Visibility = Visibility.Hidden;
             }
         }
         private async Task InitializeDownload(IMedia Media)

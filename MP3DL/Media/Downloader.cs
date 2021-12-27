@@ -126,11 +126,10 @@ namespace MP3DL.Media
             CurrentlyDownloading = Video;
             Client = new YoutubeClient();
 
-            string FileExtension = Video.Type switch
+            string FileExtension = Video.IsVideo switch
             {
-                MediaType.Video => "mp4",
-                MediaType.Audio => "mp3",
-                _ => "mp3",
+                true => "mp4",
+                false => "mp3",
             };
             string CleanFilename = LibUtils.ClearChars(Video.Name);
             var Progress = new Progress<double>(p => this.Progress = p);

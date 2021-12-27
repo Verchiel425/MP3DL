@@ -10,7 +10,7 @@ namespace MP3DL.Media
 {
     public class YouTubeVideo : IMedia
     {
-        public YouTubeVideo(Video Video, MediaType Type)
+        public YouTubeVideo(Video Video, bool IsVideo)
         {
             this.Video = Video;
             Title = Video.Title;
@@ -22,16 +22,7 @@ namespace MP3DL.Media
 
             Duration = Video.Duration.Value.TotalMilliseconds;
             ID = Video.Id;
-            this.Type = Type;
-
-            if (this.Type == MediaType.Video)
-            {
-                IsVideo = true;
-            }
-            else
-            {
-                IsVideo = false;
-            }
+            this.IsVideo = IsVideo;
         }
         public YouTubeVideo(YouTubeVideo Video)
         {
@@ -45,7 +36,6 @@ namespace MP3DL.Media
 
             Duration = Video.Duration;
             ID = Video.ID;
-            this.Type = Video.Type;
             IsVideo = Video.IsVideo;
         }
         public string Name
@@ -77,8 +67,7 @@ namespace MP3DL.Media
         {
             get { return FirstFromPrinted(); }
         }
-        public MediaType Type { get; private set; }
-        public bool IsVideo { get; private set; }
+        public bool IsVideo { get; set; }
 
         public bool Equals(IMedia? other)
         {
@@ -106,25 +95,17 @@ namespace MP3DL.Media
                 Art.Save(TempStream, System.Drawing.Imaging.ImageFormat.Jpeg);
 
                 TempStream.Position = 0;
-                TagLib.Picture pic = new TagLib.Picture();
-                pic.Data = ByteVector.FromStream(TempStream);
-                pic.Type = PictureType.FrontCover;
+                TagLib.Picture pic = new()
+                {
+                    Data = ByteVector.FromStream(TempStream),
+                    Type = PictureType.FrontCover
+                };
 
                 Tagger.Tag.Pictures = new IPicture[] { pic };
             }
 
             Tagger.Save();
             Tagger.Dispose();
-        }
-        public void SetAsVideo()
-        {
-            Type = MediaType.Video;
-            IsVideo = true;
-        }
-        public void SetAsAudio()
-        {
-            Type = MediaType.Audio;
-            IsVideo = false;
         }
         private string PrintAuthors()
         {
@@ -137,7 +118,7 @@ namespace MP3DL.Media
         }
         private string[] PrintedAuthorsToArray()
         {
-            List<string> templist = new List<string>();
+            List<string> templist = new();
             string tempstring;
             string tempprintedauthors = PrintedAuthors;
             int i = 0;

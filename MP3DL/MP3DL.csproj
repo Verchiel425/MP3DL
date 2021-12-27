@@ -51,8 +51,6 @@
   <ItemGroup>
     <PackageReference Include="AdonisUI" Version="1.17.1" />
     <PackageReference Include="AdonisUI.ClassicTheme" Version="1.17.1" />
-    <PackageReference Include="CefSharp.Common.NETCore" Version="96.0.180" />
-    <PackageReference Include="CefSharp.Wpf.NETCore" Version="96.0.180" />
     <PackageReference Include="MahApps.Metro" Version="2.4.9" />
     <PackageReference Include="NAudio" Version="2.0.1" />
     <PackageReference Include="Ookii.Dialogs.Wpf" Version="5.0.0" />
